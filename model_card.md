@@ -1,110 +1,169 @@
 # 🎧 Model Card: Music Recommender Simulation
 
-## 1. Model Name  
+## 1. Model Name
 
 **VibeMatch 1.0**
 
 ---
 
-## 2. Intended Use  
+## 2. Intended Use
 
-VibeMatch suggests the top 5 songs from a small catalog that best match a user's stated taste: favorite genre, favorite mood, a target energy level, and optionally whether they like acoustic sound. Every suggestion comes with a list of reasons showing how many points each preference contributed.
+VibeMatch is a simple music recommendation system that suggests five songs based on a user's preferences. It considers their favorite genre, preferred mood, target energy level, and whether they enjoy acoustic music.
 
-It assumes the user can describe their taste with a single genre, a single mood, and one energy number. It is built for **classroom exploration** of how scoring-based recommenders work.
+The goal is to demonstrate how recommendation systems can use song features and user preferences to rank music. Each recommendation includes a score and an explanation of how that score was calculated.
 
-**Not intended for:** real users or a real streaming product, judging the quality of real artists, any decision that affects people (e.g., which artists get paid or promoted), or users whose taste spans many genres or changes over time. The catalog is fictional.
-
----
-
-## 3. How the Model Works  
-
-Each song in the catalog has a genre, a mood, and an energy level from 0 (very calm) to 1 (very intense), plus a few other numbers like acousticness.
-
-For each song, VibeMatch hands out points:
-
-- **2 points** if the song's genre is the user's favorite genre.
-- **1 point** if the song's mood is the user's favorite mood.
-- **Up to 1 point** for energy: a perfect match gets the full point, and the score drops the further the song's energy is from what the user wants.
-- **Up to 0.5 points** for acoustic sound, but only if the user said whether they like acoustic music.
-
-All songs are sorted from most to fewest points and the top 5 are shown. If two songs tie, they are ordered alphabetically by title so the result is always the same.
-
-Compared to the starter, I implemented all of the scoring, added the energy-closeness formula and the optional acoustic bonus, made every rule produce a readable reason (including when it gives 0 points), and made the weights adjustable so experiments don't change the default behavior.
+This project is meant for learning and experimentation, not for use as a real streaming service. The catalog is small, the songs are fictional, and the system doesn't learn from users' actual listening habits.
 
 ---
 
-## 4. Data  
+## 3. How the Model Works
 
-- **20 songs** in `data/songs.csv`: the 10 starter songs plus 10 fictional songs I added.
-- **Genres (15):** pop (3), lofi (3), rock (2), and one each of ambient, jazz, synthwave, indie pop, hip hop, r&b, metal, country, edm, classical, reggae, folk.
-- **Moods (13):** happy, chill, intense, relaxed, moody, focused, confident, romantic, angry, nostalgic, euphoric, sad, melancholy.
-- The added songs were chosen to fill gaps: low-energy sad songs (classical, folk), very high-energy aggressive songs (metal, rock/angry), and genres missing from the starter (hip hop, r&b, country, reggae, edm).
-- **Missing:** real listening data, lyrics, language, release year, non-Western genres, and more than one or two songs for most genres. All songs and artists are fictional.
+VibeMatch uses a weighted scoring system. Instead of randomly recommending songs, it compares each song's features with the user's preferences.
 
----
+Each song can earn:
 
-## 5. Strengths  
+- **2 points** if its genre matches the user's favorite genre.
+- **1 point** if its mood matches the user's preferred mood.
+- **Up to 1 point** based on how close its energy level is to the user's target.
+- **Up to 0.5 points** for acoustic similarity, if the user provides that preference.
 
-- **Clear, consistent profiles work well.** Chill Lofi's top 3 are all lofi songs with energy 0.35–0.42, and Intense Rock's #1 is *Storm Runner* (rock, intense, 0.91) with a score of 3.99 out of 4.
-- **Opposite profiles stay separate.** Chill Lofi and Intense Rock share no songs in their top 5.
-- **Explanations are transparent.** Every point is listed, so it's easy to see exactly why a song ranked where it did, including when the ranking is bad.
-- **Deterministic.** The same input always gives the same output.
+After calculating the scores, the program sorts the songs from highest to lowest and returns the top five recommendations. Songs with identical scores are sorted alphabetically by title.
+
+I built the scoring logic in Python with help from Claude Code and made sure each recommendation includes reasons explaining the points awarded. The weights can also be adjusted to compare how different scoring rules affect the recommendations.
 
 ---
 
-## 6. Limitations and Bias 
+## 4. Data
 
-- **Genre dominance.** Genre is worth 2 points, the same as a perfect mood + energy match combined. For the contradictory profile (ambient + angry + 0.95 energy), the #1 result was *Spacewalk Thoughts*, a chill song with energy 0.28, only because it is ambient.
-- **Exact label matching.** `indie pop` gets no credit from a `pop` profile, so *Rooftop Lights* (happy, energy 0.76) ranks below *Neon Heartbreak* (pop but sad) for the High-Energy Pop profile.
-- **Uneven catalog coverage.** Lofi and pop each have 3 songs; 12 genres have only 1. Users of rare genres get one match and then filler picked mostly by energy.
-- **Filter bubble.** Results repeat the same genre and sometimes the same artist (2 of the top 3 for Chill Lofi are by LoRoom). There is no diversity rule.
-- **Ignored features.** Tempo, valence, and danceability are loaded but not used in scoring.
-- **One-dimensional users.** A profile only holds one genre and one mood; people who like several styles can't be represented.
+The dataset contains **20 fictional songs** stored in `data/songs.csv`. The starter repository originally had 10 songs, and another 10 were added to introduce more variety.
 
----
+The dataset includes:
 
-## 7. Evaluation  
+- **15 genres**, including pop, lofi, rock, hip hop, reggae, jazz, classical, metal, and others.
+- **13 moods**, including happy, chill, intense, relaxed, angry, nostalgic, and sad.
+- Numerical features such as energy, tempo, valence, danceability, and acousticness.
 
-**Profiles tested** (all in `src/main.py`):
+The additional songs helped introduce different combinations of genres, moods, and energy levels.
 
-1. High-Energy Pop — pop, happy, energy 0.85
-2. Chill Lofi — lofi, chill, energy 0.35, likes acoustic
-3. Intense Rock — rock, intense, energy 0.90
-4. Contradictory — ambient, angry, energy 0.95 (a calm genre with an aggressive mood)
-
-**What I looked for:** whether the #1 song matched all preferences, whether the rest of the top 5 made sense, and whether opposite profiles got different songs.
-
-**Results:**
-- Profiles 1–3 each got a #1 song matching genre, mood, and energy (scores 3.97, 4.43, 3.99).
-- High-Energy Pop and Intense Rock overlapped on two songs (*Gym Hero*, *Basement Riot*) because both want high energy; their order flipped depending on which profile got the genre bonus.
-- The contradictory profile exposed genre dominance: a 0.28-energy ambient song beat a metal/angry/0.97-energy song.
-
-**Weight-shift experiment** (genre 2.0 → 1.0, energy 1.0 → 2.0, run with `python -m src.main --experiment`):
-- Contradictory: *Spacewalk Thoughts* dropped from #1 to outside the top 5; *Iron Lung Parade* became #1.
-- High-Energy Pop: *Rooftop Lights* (indie pop, happy) moved from #4 to #3 above *Neon Heartbreak* (pop, sad).
-- Chill Lofi: *Spacewalk Thoughts* (ambient, chill) moved from #4 to #3 above *Focus Flow* (lofi, focused).
-- Intense Rock: same order, but the pop song *Gym Hero* came within 0.02 points of the #2 rock song.
-
-**Surprise:** one weight change fixed the contradictory case but almost erased genre for the rock fan. There isn't one set of weights that's best for every profile.
-
-**Automated tests:** 20 pytest tests (loading, conversion, invalid rows, scoring rules, explanations, ranking, top-k, empty catalog, tie-breaking). All 20 passed on the last run.
+However, 20 songs are not enough to represent the variety of music people listen to. Some genres have only one song, and the dataset does not include real listening histories, user feedback, or songs from many musical traditions.
 
 ---
 
-## 8. Future Work  
+## 5. Strengths
 
-- **Partial genre/mood matching** — e.g., give `indie pop` half credit for `pop`, or group moods like chill/relaxed.
-- **Use tempo, valence, and danceability** with normalized closeness scores (tempo divided by a max BPM).
-- **Diversity rule** — limit how many songs from one artist or genre can appear in the top 5.
-- **Multiple favorite genres/moods** per user, with their own weights.
-- **Bigger, more balanced catalog** so rare-genre users aren't stuck with filler.
+One thing VibeMatch does well is recommending songs when the user's preferences are clear.
+
+For example, the Chill Lofi profile received three lofi songs at the top of its recommendations, with energy levels close to the requested value. The Intense Rock profile also received *Storm Runner*, a rock song with an intense mood and energy of 0.91, as its highest-ranked recommendation.
+
+The Chill Lofi and Intense Rock profiles had no songs in common in their top five, which shows that the algorithm can distinguish between very different preferences.
+
+Another strength is that users can see why songs were recommended. Instead of only displaying a ranked list, the system explains which features contributed to each score.
+
+The results are also consistent. Running the same profile with the same dataset and weights produces the same ranking.
 
 ---
 
-## 9. Personal Reflection  
+## 6. Limitations and Bias
 
-<!-- Julius: rewrite this section in your own words before submitting. -->
+The biggest weakness I noticed was how much influence the genre weight had on the final rankings.
 
-The biggest lesson was that the weights *are* the model. The code is a few if-statements and one formula, but whether a calm ambient song or an angry metal song comes first for the same user depends entirely on whether genre is worth 1 or 2 points. Printing the reason for every point made it easy to see when a ranking was "technically correct but wrong."
+Since a matching genre earns two points, a song can rank highly even when its mood and energy do not match what the user wants.
 
-It was also surprising how quickly bias appeared in only 20 songs: the genres that happened to have more songs in the data got better recommendations. Real music apps have the same problem at a much bigger scale, and their users usually can't see the reasons behind what they're shown.
+This happened with the contradictory profile, which requested ambient music, an angry mood, and energy of 0.95. The system recommended *Spacewalk Thoughts* first, even though its energy was only 0.28. It ranked first mainly because its genre matched.
+
+I also noticed other limitations:
+
+- **Exact matching:** A song labeled `indie pop` does not receive genre points when the user selects `pop`, even though those genres are related.
+- **Uneven representation:** Pop and lofi have more songs than most other genres, giving those preferences more matching options.
+- **Limited variety:** The system can recommend several songs from the same genre or artist because it does not enforce diversity.
+- **Unused features:** Tempo, valence, and danceability are available in the dataset but are not used when calculating scores.
+- **Simple user profiles:** Each user can select only one favorite genre and mood, which does not reflect how varied people's music preferences can be.
+
+These limitations show how a recommendation system can produce mathematically correct rankings that do not necessarily reflect what someone would enjoy listening to.
+
+---
+
+## 7. Evaluation
+
+I evaluated VibeMatch using four different user profiles:
+
+| Profile | Genre | Mood | Energy |
+|---|---|---|---|
+| High-Energy Pop | Pop | Happy | 0.85 |
+| Chill Lofi | Lofi | Chill | 0.35 |
+| Intense Rock | Rock | Intense | 0.90 |
+| Contradictory | Ambient | Angry | 0.95 |
+
+The Chill Lofi profile also included a preference for acoustic music.
+
+### Results
+
+The first three profiles produced recommendations that made sense based on their selected preferences.
+
+Their top recommendations matched the requested genres, moods, and energy levels, with scores of 3.97, 4.43, and 3.99 respectively.
+
+High-Energy Pop and Intense Rock shared two songs in their top five: *Gym Hero* and *Basement Riot*. This was interesting because the profiles requested different genres, but both preferred high-energy music.
+
+The contradictory profile revealed a problem. *Spacewalk Thoughts*, a low-energy ambient song, ranked above songs that better matched the requested angry mood and high energy.
+
+### Weight Experiment
+
+To understand this issue, I compared the original scoring weights with an alternative version.
+
+I changed:
+
+- Genre weight from **2.0 to 1.0**
+- Energy weight from **1.0 to 2.0**
+
+I ran the experiment with Claude Code using:
+
+`python -m src.main --experiment`
+
+The changes affected the results:
+
+- **Contradictory profile:** *Spacewalk Thoughts* fell outside the top five, while *Iron Lung Parade* became the top recommendation.
+- **High-Energy Pop:** *Rooftop Lights* moved from fourth to third because its mood and energy were closer to the user's preferences.
+- **Chill Lofi:** *Spacewalk Thoughts* moved from fourth to third, ahead of *Focus Flow*.
+- **Intense Rock:** The ranking stayed the same, but *Gym Hero* came within 0.02 points of the second-ranked rock song.
+
+This experiment showed that changing the weights can improve recommendations for one type of user while making them less suitable for another.
+
+### Automated Testing
+
+I used Claude Code to write and run a `pytest` suite that checks the system's behavior.
+
+The test suite covered CSV loading, numerical conversions, scoring rules, recommendation explanations, ranking order, empty datasets, and tie-breaking.
+
+**All 20 tests passed** during the final implementation run.
+
+---
+
+## 8. Future Work
+
+If I continued developing VibeMatch, I would focus on making its recommendations more flexible and realistic.
+
+Some improvements I would consider are:
+
+- **Related genre matching:** Give partial points when genres are similar, such as pop and indie pop.
+- **More song features:** Include tempo, valence, and danceability in the scoring formula.
+- **Recommendation diversity:** Avoid recommending too many songs from the same artist or genre.
+- **More flexible profiles:** Allow users to select multiple favorite genres and moods.
+- **Larger dataset:** Add more songs from different genres, cultures, and musical styles.
+
+I would also like to explore how user feedback, such as likes and skips, could help the system improve its recommendations over time.
+
+---
+
+## 9. Personal Reflection
+
+What stood out to me most during this project was how much the weights affected the recommendations. Before working through the scoring system, I understood that recommendations depended on user preferences, but I hadn't really considered how much difference assigning two points to genre instead of one could make.
+
+The contradictory profile was probably the clearest example. It asked for an angry, high-energy song, but the system recommended a calm ambient track simply because the genre matched. The program wasn't necessarily calculating anything incorrectly. It was following the rules we had given it. That helped me understand why designing the scoring logic matters just as much as writing the code.
+
+I used Claude Code to help implement the recommender, generate tests, run the evaluation profiles, and document the results. The score explanations were particularly useful because they let me connect each ranking to the actual rules instead of just accepting the output. For example, they showed that *Spacewalk Thoughts* topped the contradictory profile only because of its +2.00 genre match, since its energy only earned +0.33.
+
+Another thing I found interesting was how limitations appeared even with only 20 songs. Some genres had more options than others, and certain songs repeatedly appeared in the recommendations. It made me realize that recommendation quality depends not only on the algorithm but also on the data available.
+
+If I extended the project, I would want users to choose multiple genres and moods instead of being limited to one of each. The weights can already be changed in code, so I would also add an interactive interface where users could adjust them and decide whether genre, mood, or energy matters most to them.
+
+Overall, this project gave me a better understanding of how a relatively simple Python algorithm can produce personalized recommendations, and why those recommendations still need to be evaluated instead of assuming the highest score always means the best choice.

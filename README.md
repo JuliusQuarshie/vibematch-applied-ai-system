@@ -2,327 +2,673 @@
 
 ## Project Summary
 
-This project is a small, CLI-first, **content-based** music recommender. It loads a 20-song catalog from `data/songs.csv`, compares each song to a user's taste profile (favorite genre, favorite mood, target energy, and an optional acoustic preference), gives every song a weighted score, and prints the top 5 with a line-by-line explanation of where each point came from. It also includes a weight-shift experiment and a model card that discusses its biases.
+This project is a Python-based music recommendation system called **VibeMatch 1.0**. It recommends songs based on a user's preferred genre, mood, energy level, and optional acoustic preference.
+
+The system uses a content-based filtering approach. It loads 20 songs from a CSV file, compares each song's features with the user's preferences, calculates a score, and ranks the songs from highest to lowest.
+
+Each recommendation includes an explanation of how its score was calculated, making it easier to understand why certain songs were recommended.
+
+The project also includes automated testing, an experiment comparing different scoring weights, and a Model Card explaining the system's limitations and potential biases.
 
 ---
 
 ## Content-Based vs. Collaborative Filtering
 
-- **Collaborative filtering** recommends based on *other people's behavior*: "users who liked what you liked also liked X." It needs lots of user interaction data (plays, likes, skips) and knows nothing about the songs themselves.
-- **Content-based filtering** recommends based on *the item's own features*: "this song is pop, happy, and high energy, and so is your profile." It works with zero other users, which is why it fits this project, but it can only recommend things that look like what you already said you like.
+Music recommendation platforms use different methods to predict what users might enjoy.
 
-This project is purely content-based. There is no user history or other users in the data.
+**Collaborative filtering** uses information about other users' behavior. For example, if two people listen to similar music, the system might recommend songs that one person enjoys but the other hasn't discovered yet. This approach commonly uses listening history, likes, skips, and playlists.
+
+**Content-based filtering** focuses on the features of the songs themselves. It compares attributes such as genre, mood, and energy with the user's preferences.
+
+VibeMatch uses content-based filtering because it does not have real user listening histories or interaction data.
+
+This approach is easier to understand and implement, but it can also limit recommendations to music that closely matches the preferences a user has already provided.
 
 ---
 
-## How The System Works
+## How the System Works
 
-### Data features
+### Dataset and Features
 
-The real CSV header is:
+The music catalog is stored in `data/songs.csv`.
 
-```
+It contains 20 fictional songs: 10 from the starter repository and 10 additional songs added to increase the variety of genres, moods, and energy levels.
+
+The dataset uses these columns:
+
+```text
 id,title,artist,genre,mood,energy,tempo_bpm,valence,danceability,acousticness
 ```
 
-| Column | Type | Used in score? |
+| Feature | Description | Used in Scoring? |
 |---|---|---|
-| `id` | int | No (tie-breaker only) |
-| `title`, `artist` | text | No (display only; title is a tie-breaker) |
-| `genre` | text | **Yes** — exact match |
-| `mood` | text | **Yes** — exact match |
-| `energy` | float 0–1 | **Yes** — closeness to target |
-| `acousticness` | float 0–1 | **Yes** — only if the profile sets `likes_acoustic` |
-| `tempo_bpm`, `valence`, `danceability` | float | Loaded and validated, but not scored (kept simple on purpose) |
+| `id` | Unique song identifier | Tie-breaking |
+| `title` | Song title | Display and tie-breaking |
+| `artist` | Artist name | Display |
+| `genre` | Musical category | Yes |
+| `mood` | Emotional feel of the song | Yes |
+| `energy` | Energy level from 0 to 1 | Yes |
+| `tempo_bpm` | Musical tempo | No |
+| `valence` | Musical positivity | No |
+| `danceability` | How suitable the song is for dancing | No |
+| `acousticness` | Degree of acoustic sound | Optional |
 
-### Taste profiles
+The additional numerical features are loaded and validated even when they are not used in the current scoring formula.
 
-A taste profile is a plain dictionary. All keys are optional:
+### User Taste Profiles
+
+A taste profile represents the type of music a user wants to hear.
+
+For example:
 
 ```python
-{"genre": "lofi", "mood": "chill", "target_energy": 0.35, "likes_acoustic": True}
+{
+    "genre": "lofi",
+    "mood": "chill",
+    "target_energy": 0.35,
+    "likes_acoustic": True
+}
 ```
 
-The starter key `"energy"` is also accepted as an alias for `"target_energy"`. The `UserProfile` dataclass used by the `Recommender` class is converted into this same dictionary, so both APIs share one scoring function.
+This profile describes someone who enjoys lofi music, prefers a relaxed mood, wants relatively low energy, and likes acoustic sounds.
 
-### Scoring recipe
+The system also accepts `energy` as an alternative key for `target_energy`.
 
-For each song:
+Taste profiles are represented using Python dictionaries. The starter `UserProfile` dataclass is also supported through the `Recommender` class.
 
-| Rule | Points |
+### Scoring Algorithm
+
+Each song receives points based on how closely it matches the user's preferences.
+
+| Condition | Points |
 |---|---|
-| Genre matches (case-insensitive) | **+2.0** |
-| Mood matches (case-insensitive) | **+1.0** |
-| Energy closeness | **+1.0 × max(0, 1 − \|song_energy − target_energy\|)** |
-| Acoustic fit (only if `likes_acoustic` is set) | **+0.5 × acousticness** if True, **+0.5 × (1 − acousticness)** if False |
+| Matching genre | +2.0 |
+| Matching mood | +1.0 |
+| Energy similarity | Up to +1.0 |
+| Acoustic similarity | Up to +0.5 |
 
-Maximum possible score is 4.5 (or 4.0 without an acoustic preference). Energy and acousticness are already on a 0–1 scale in the CSV, so no extra normalization is needed; `load_songs` rejects rows where they fall outside 0–1.
+**Genre matching**
 
-Every rule adds a reason string, including misses (e.g. `genre 'rock' is not 'pop' (+0.00)`), so the output shows *why* a song ranked where it did.
+If the song's genre matches the user's favorite genre, the system awards 2 points.
 
-### Ranking
+**Mood matching**
 
-`recommend_songs` scores every song, sorts by score (highest first), breaks ties by title then id so results are deterministic, and returns the top `k` as `(song, score, explanation)` tuples. An empty catalog or `k <= 0` returns `[]`.
+If the song's mood matches the preferred mood, the system awards 1 point.
 
-### Data flow
+**Energy similarity**
+
+Energy is scored using:
+
+```python
+energy_score = max(
+    0,
+    1 - abs(song_energy - target_energy)
+)
+```
+
+This formula rewards songs whose energy levels are close to the user's preference.
+
+For example, if a user wants energy of 0.85 and a song has energy of 0.82:
+
+```text
+Energy score = 1 - |0.82 - 0.85|
+Energy score = 0.97
+```
+
+**Acoustic similarity**
+
+If the user provides an acoustic preference, the system calculates an additional score:
+
+```python
+# User likes acoustic music
+acoustic_score = 0.5 * acousticness
+
+# User does not prefer acoustic music
+acoustic_score = 0.5 * (1 - acousticness)
+```
+
+The maximum total score is **4.5 points**, or **4.0 points** when no acoustic preference is provided.
+
+### Ranking Songs
+
+The `recommend_songs()` function calculates a score for every song in the catalog.
+
+It then sorts the songs from highest to lowest score and returns the top `k` recommendations.
+
+When songs have identical scores, the system uses their titles and IDs to produce a consistent order.
+
+Every result includes:
+
+- Song title and artist
+- Genre and mood
+- Final numerical score
+- Reasons explaining the score
+
+This makes the recommendations easier to evaluate rather than simply displaying a list of songs.
+
+### System Data Flow
 
 ```mermaid
 flowchart LR
-    A[data/songs.csv] -->|csv.DictReader + type conversion| B[load_songs]
-    B --> C[list of song dicts]
-    P[taste profile dict] --> D[score_song]
-    C --> D
-    D -->|score + reasons| E[recommend_songs]
-    E -->|sort desc, tie-break by title| F[top k]
-    F --> G[src/main.py CLI output]
+    A["songs.csv"] --> B["Load Song Data"]
+    B --> C["Song Features"]
+    D["User Taste Profile"] --> E["Score Each Song"]
+    C --> E
+    E --> F["Rank by Score"]
+    F --> G["Top K Recommendations"]
+    G --> H["Display Scores and Reasons"]
 ```
 
-### Expected biases (before testing)
+### Expected Limitations
 
-- Genre is worth twice as much as mood, so a genre match alone (+2.0) can beat a song that matches mood and energy perfectly (+2.0 max). I expected genre to dominate.
-- Matching is exact text, so `indie pop` gets no genre credit from a `pop` profile.
-- Most genres only have one song, so users of rare genres get thin results.
+Before running the evaluation, I expected genre to have a strong influence because it receives twice as many points as mood.
+
+I also expected exact matching to create problems. For example, a song labeled `indie pop` would not receive genre points from a profile requesting `pop`.
+
+Another concern was that the small dataset might produce better recommendations for genres with several songs than for genres represented by only one.
 
 ---
 
 ## Getting Started
 
-### Setup
+### Requirements
 
-1. Create a virtual environment (optional but recommended):
+- Python 3.10 or later
+- pip
+- Git
+- pytest for automated testing
 
-   ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate      # Mac or Linux
-   .venv\Scripts\activate         # Windows
-   ```
+### Installation
 
-2. Install dependencies (the recommender itself only uses the standard library; `pytest` is needed for tests):
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. Run the app from the repository root:
-
-   ```bash
-   python -m src.main                # top 5 for every evaluation profile
-   python -m src.main --experiment   # baseline vs. shifted weights
-   python -m src.main -k 3           # change how many results are shown
-   ```
-
-### Running Tests
+Clone the repository:
 
 ```bash
-python -m pytest
+git clone https://github.com/JuliusQuarshie/ai110-module3show-musicrecommendersimulation-starter.git
+cd ai110-module3show-musicrecommendersimulation-starter
 ```
 
-`pytest.ini` adds the repo root to the import path, so plain `pytest` works too. The suite (`tests/test_recommender.py` from the starter plus `tests/test_scoring.py`) covers CSV loading, numeric conversion, skipping invalid rows, missing/empty files, genre and mood scoring, energy closeness, the acoustic bonus, explanation strings, descending order, top-k limits, empty catalogs, tie-breaking, and making sure experiment weights don't modify the defaults. Last run: **20 passed**.
+Create a virtual environment:
+
+```bash
+python3 -m venv .venv
+```
+
+Activate it on Linux or macOS:
+
+```bash
+source .venv/bin/activate
+```
+
+On Windows:
+
+```powershell
+.venv\Scripts\activate
+```
+
+Install the dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+### Run the Music Recommender
+
+To display recommendations for all evaluation profiles:
+
+```bash
+python3 -m src.main
+```
+
+To run the weight experiment:
+
+```bash
+python3 -m src.main --experiment
+```
+
+To change the number of recommendations displayed:
+
+```bash
+python3 -m src.main -k 3
+```
+
+The recommender itself uses Python's standard library.
 
 ---
 
 ## Sample Recommendation Output
 
-Four profiles are defined in `src/main.py`: three contrasting ones (High-Energy Pop, Chill Lofi, Intense Rock) and one deliberately contradictory one (ambient genre + angry mood + 0.95 energy). This is the real output of `python -m src.main`:
+I evaluated the system using four preference profiles:
 
+1. High-Energy Pop
+2. Chill Lofi
+3. Intense Rock
+4. Contradictory Preferences
+
+The fourth profile intentionally combines preferences that do not naturally fit together, so I could see how the algorithm handles conflicting preferences.
+
+The following output was generated by running:
+
+```bash
+python3 -m src.main
 ```
+
+I simplified the spacing and separator lines for readability, but the songs, rankings, scores, and reasons are unchanged from the terminal output.
+
+### Profile 1: High-Energy Pop
+
+```text
 Loaded songs: 20
 
-========================================================================
 Profile: High-Energy Pop
-Prefs:   {'genre': 'pop', 'mood': 'happy', 'target_energy': 0.85}
-------------------------------------------------------------------------
-1. Sunrise City by Neon Echo  [pop, happy]  Score: 3.97
-     - genre matches 'pop' (+2.00)
-     - mood matches 'happy' (+1.00)
-     - energy 0.82 vs target 0.85 (+0.97)
-2. Gym Hero by Max Pulse  [pop, intense]  Score: 2.92
-     - genre matches 'pop' (+2.00)
-     - mood 'intense' is not 'happy' (+0.00)
-     - energy 0.93 vs target 0.85 (+0.92)
-3. Neon Heartbreak by Glass Arcade  [pop, sad]  Score: 2.79
-     - genre matches 'pop' (+2.00)
-     - mood 'sad' is not 'happy' (+0.00)
-     - energy 0.64 vs target 0.85 (+0.79)
-4. Rooftop Lights by Indigo Parade  [indie pop, happy]  Score: 1.91
-     - genre 'indie pop' is not 'pop' (+0.00)
-     - mood matches 'happy' (+1.00)
-     - energy 0.76 vs target 0.85 (+0.91)
-5. Basement Riot by Cutthroat Choir  [rock, angry]  Score: 0.97
-     - genre 'rock' is not 'pop' (+0.00)
-     - mood 'angry' is not 'happy' (+0.00)
-     - energy 0.88 vs target 0.85 (+0.97)
+Prefs: {'genre': 'pop', 'mood': 'happy', 'target_energy': 0.85}
 
-========================================================================
+1. Sunrise City by Neon Echo [pop, happy] Score: 3.97
+   - genre matches 'pop' (+2.00)
+   - mood matches 'happy' (+1.00)
+   - energy 0.82 vs target 0.85 (+0.97)
+
+2. Gym Hero by Max Pulse [pop, intense] Score: 2.92
+   - genre matches 'pop' (+2.00)
+   - mood 'intense' is not 'happy' (+0.00)
+   - energy 0.93 vs target 0.85 (+0.92)
+
+3. Neon Heartbreak by Glass Arcade [pop, sad] Score: 2.79
+   - genre matches 'pop' (+2.00)
+   - mood 'sad' is not 'happy' (+0.00)
+   - energy 0.64 vs target 0.85 (+0.79)
+
+4. Rooftop Lights by Indigo Parade [indie pop, happy] Score: 1.91
+   - genre 'indie pop' is not 'pop' (+0.00)
+   - mood matches 'happy' (+1.00)
+   - energy 0.76 vs target 0.85 (+0.91)
+
+5. Basement Riot by Cutthroat Choir [rock, angry] Score: 0.97
+   - genre 'rock' is not 'pop' (+0.00)
+   - mood 'angry' is not 'happy' (+0.00)
+   - energy 0.88 vs target 0.85 (+0.97)
+```
+
+The results show that genre has a strong influence. *Neon Heartbreak* ranked above *Rooftop Lights*, even though *Rooftop Lights* matched the requested happy mood and had an energy level closer to the user's target.
+
+### Profile 2: Chill Lofi
+
+```text
 Profile: Chill Lofi
-Prefs:   {'genre': 'lofi', 'mood': 'chill', 'target_energy': 0.35, 'likes_acoustic': True}
-------------------------------------------------------------------------
-1. Library Rain by Paper Lanterns  [lofi, chill]  Score: 4.43
-     - genre matches 'lofi' (+2.00)
-     - mood matches 'chill' (+1.00)
-     - energy 0.35 vs target 0.35 (+1.00)
-     - acoustic fit 0.86 (+0.43)
-2. Midnight Coding by LoRoom  [lofi, chill]  Score: 4.29
-     - genre matches 'lofi' (+2.00)
-     - mood matches 'chill' (+1.00)
-     - energy 0.42 vs target 0.35 (+0.93)
-     - acoustic fit 0.71 (+0.35)
-3. Focus Flow by LoRoom  [lofi, focused]  Score: 3.34
-     - genre matches 'lofi' (+2.00)
-     - mood 'focused' is not 'chill' (+0.00)
-     - energy 0.40 vs target 0.35 (+0.95)
-     - acoustic fit 0.78 (+0.39)
-4. Spacewalk Thoughts by Orbit Bloom  [ambient, chill]  Score: 2.39
-     - genre 'ambient' is not 'lofi' (+0.00)
-     - mood matches 'chill' (+1.00)
-     - energy 0.28 vs target 0.35 (+0.93)
-     - acoustic fit 0.92 (+0.46)
-5. Coffee Shop Stories by Slow Stereo  [jazz, relaxed]  Score: 1.43
-     - genre 'jazz' is not 'lofi' (+0.00)
-     - mood 'relaxed' is not 'chill' (+0.00)
-     - energy 0.37 vs target 0.35 (+0.98)
-     - acoustic fit 0.89 (+0.45)
+Prefs: {'genre': 'lofi', 'mood': 'chill', 'target_energy': 0.35, 'likes_acoustic': True}
 
-========================================================================
+1. Library Rain by Paper Lanterns [lofi, chill] Score: 4.43
+   - genre matches 'lofi' (+2.00)
+   - mood matches 'chill' (+1.00)
+   - energy 0.35 vs target 0.35 (+1.00)
+   - acoustic fit 0.86 (+0.43)
+
+2. Midnight Coding by LoRoom [lofi, chill] Score: 4.29
+   - genre matches 'lofi' (+2.00)
+   - mood matches 'chill' (+1.00)
+   - energy 0.42 vs target 0.35 (+0.93)
+   - acoustic fit 0.71 (+0.35)
+
+3. Focus Flow by LoRoom [lofi, focused] Score: 3.34
+   - genre matches 'lofi' (+2.00)
+   - mood 'focused' is not 'chill' (+0.00)
+   - energy 0.40 vs target 0.35 (+0.95)
+   - acoustic fit 0.78 (+0.39)
+
+4. Spacewalk Thoughts by Orbit Bloom [ambient, chill] Score: 2.39
+   - genre 'ambient' is not 'lofi' (+0.00)
+   - mood matches 'chill' (+1.00)
+   - energy 0.28 vs target 0.35 (+0.93)
+   - acoustic fit 0.92 (+0.46)
+
+5. Coffee Shop Stories by Slow Stereo [jazz, relaxed] Score: 1.43
+   - genre 'jazz' is not 'lofi' (+0.00)
+   - mood 'relaxed' is not 'chill' (+0.00)
+   - energy 0.37 vs target 0.35 (+0.98)
+   - acoustic fit 0.89 (+0.45)
+```
+
+This profile produced three lofi songs at the top. Their relatively low energy levels matched the user's preferences.
+
+### Profile 3: Intense Rock
+
+```text
 Profile: Intense Rock
-Prefs:   {'genre': 'rock', 'mood': 'intense', 'target_energy': 0.9}
-------------------------------------------------------------------------
-1. Storm Runner by Voltline  [rock, intense]  Score: 3.99
-     - genre matches 'rock' (+2.00)
-     - mood matches 'intense' (+1.00)
-     - energy 0.91 vs target 0.90 (+0.99)
-2. Basement Riot by Cutthroat Choir  [rock, angry]  Score: 2.98
-     - genre matches 'rock' (+2.00)
-     - mood 'angry' is not 'intense' (+0.00)
-     - energy 0.88 vs target 0.90 (+0.98)
-3. Gym Hero by Max Pulse  [pop, intense]  Score: 1.97
-     - genre 'pop' is not 'rock' (+0.00)
-     - mood matches 'intense' (+1.00)
-     - energy 0.93 vs target 0.90 (+0.97)
-4. Pulse Reactor by Kilowatt Kid  [edm, euphoric]  Score: 0.95
-     - genre 'edm' is not 'rock' (+0.00)
-     - mood 'euphoric' is not 'intense' (+0.00)
-     - energy 0.95 vs target 0.90 (+0.95)
-5. Iron Lung Parade by Grave Engine  [metal, angry]  Score: 0.93
-     - genre 'metal' is not 'rock' (+0.00)
-     - mood 'angry' is not 'intense' (+0.00)
-     - energy 0.97 vs target 0.90 (+0.93)
+Prefs: {'genre': 'rock', 'mood': 'intense', 'target_energy': 0.9}
 
-========================================================================
+1. Storm Runner by Voltline [rock, intense] Score: 3.99
+   - genre matches 'rock' (+2.00)
+   - mood matches 'intense' (+1.00)
+   - energy 0.91 vs target 0.90 (+0.99)
+
+2. Basement Riot by Cutthroat Choir [rock, angry] Score: 2.98
+   - genre matches 'rock' (+2.00)
+   - mood 'angry' is not 'intense' (+0.00)
+   - energy 0.88 vs target 0.90 (+0.98)
+
+3. Gym Hero by Max Pulse [pop, intense] Score: 1.97
+   - genre 'pop' is not 'rock' (+0.00)
+   - mood matches 'intense' (+1.00)
+   - energy 0.93 vs target 0.90 (+0.97)
+
+4. Pulse Reactor by Kilowatt Kid [edm, euphoric] Score: 0.95
+   - genre 'edm' is not 'rock' (+0.00)
+   - mood 'euphoric' is not 'intense' (+0.00)
+   - energy 0.95 vs target 0.90 (+0.95)
+
+5. Iron Lung Parade by Grave Engine [metal, angry] Score: 0.93
+   - genre 'metal' is not 'rock' (+0.00)
+   - mood 'angry' is not 'intense' (+0.00)
+   - energy 0.97 vs target 0.90 (+0.93)
+```
+
+The top two recommendations matched the rock genre, while the remaining songs were selected mainly because they had similar moods or high energy levels.
+
+### Profile 4: Contradictory Preferences
+
+```text
 Profile: Contradictory (Ambient + Angry + 0.95)
-Prefs:   {'genre': 'ambient', 'mood': 'angry', 'target_energy': 0.95}
-------------------------------------------------------------------------
-1. Spacewalk Thoughts by Orbit Bloom  [ambient, chill]  Score: 2.33
-     - genre matches 'ambient' (+2.00)
-     - mood 'chill' is not 'angry' (+0.00)
-     - energy 0.28 vs target 0.95 (+0.33)
-2. Iron Lung Parade by Grave Engine  [metal, angry]  Score: 1.98
-     - genre 'metal' is not 'ambient' (+0.00)
-     - mood matches 'angry' (+1.00)
-     - energy 0.97 vs target 0.95 (+0.98)
-3. Basement Riot by Cutthroat Choir  [rock, angry]  Score: 1.93
-     - genre 'rock' is not 'ambient' (+0.00)
-     - mood matches 'angry' (+1.00)
-     - energy 0.88 vs target 0.95 (+0.93)
-4. Pulse Reactor by Kilowatt Kid  [edm, euphoric]  Score: 1.00
-     - genre 'edm' is not 'ambient' (+0.00)
-     - mood 'euphoric' is not 'angry' (+0.00)
-     - energy 0.95 vs target 0.95 (+1.00)
-5. Gym Hero by Max Pulse  [pop, intense]  Score: 0.98
-     - genre 'pop' is not 'ambient' (+0.00)
-     - mood 'intense' is not 'angry' (+0.00)
-     - energy 0.93 vs target 0.95 (+0.98)
+Prefs: {'genre': 'ambient', 'mood': 'angry', 'target_energy': 0.95}
+
+1. Spacewalk Thoughts by Orbit Bloom [ambient, chill] Score: 2.33
+   - genre matches 'ambient' (+2.00)
+   - mood 'chill' is not 'angry' (+0.00)
+   - energy 0.28 vs target 0.95 (+0.33)
+
+2. Iron Lung Parade by Grave Engine [metal, angry] Score: 1.98
+   - genre 'metal' is not 'ambient' (+0.00)
+   - mood matches 'angry' (+1.00)
+   - energy 0.97 vs target 0.95 (+0.98)
+
+3. Basement Riot by Cutthroat Choir [rock, angry] Score: 1.93
+   - genre 'rock' is not 'ambient' (+0.00)
+   - mood matches 'angry' (+1.00)
+   - energy 0.88 vs target 0.95 (+0.93)
+
+4. Pulse Reactor by Kilowatt Kid [edm, euphoric] Score: 1.00
+   - genre 'edm' is not 'ambient' (+0.00)
+   - mood 'euphoric' is not 'angry' (+0.00)
+   - energy 0.95 vs target 0.95 (+1.00)
+
+5. Gym Hero by Max Pulse [pop, intense] Score: 0.98
+   - genre 'pop' is not 'ambient' (+0.00)
+   - mood 'intense' is not 'angry' (+0.00)
+   - energy 0.93 vs target 0.95 (+0.98)
 ```
+
+This profile revealed a weakness in the scoring algorithm.
+
+*Spacewalk Thoughts* ranked first because its genre matched, even though its mood and energy were far from the requested preferences.
+
+That result motivated the weight experiment.
 
 ---
 
-## Experiments You Tried
+## Scoring Weight Experiment
 
-### Weight shift: halve genre, double energy
+### Experiment Setup
 
-`python -m src.main --experiment` re-ranks every profile with `genre=1.0, energy=2.0` (mood and acoustic unchanged). The experiment weights are passed in as an argument, so `DEFAULT_WEIGHTS` and the normal CLI output are never changed (a test checks this). Real output:
+I wanted to see what would happen if energy similarity mattered more than matching the exact genre.
 
-```
-Loaded songs: 20
+The original weights were:
 
-Baseline weights:   genre=2.0, mood=1.0, energy=1.0, acoustic=0.5
-Experiment weights: genre=1.0, mood=1.0, energy=2.0, acoustic=0.5
+| Feature | Original Weight | Experimental Weight |
+|---|---:|---:|
+| Genre | 2.0 | 1.0 |
+| Mood | 1.0 | 1.0 |
+| Energy | 1.0 | 2.0 |
+| Acoustic | 0.5 | 0.5 |
 
-========================================================================
-Profile: High-Energy Pop
-#  Baseline                          Experiment
-1  Sunrise City (3.97)               Sunrise City (3.94)
-2  Gym Hero (2.92)                   Gym Hero (2.84)
-3  Neon Heartbreak (2.79)            Rooftop Lights (2.82)
-4  Rooftop Lights (1.91)             Neon Heartbreak (2.58)
-5  Basement Riot (0.97)              Basement Riot (1.94)
+The experiment was run using:
 
-========================================================================
-Profile: Chill Lofi
-#  Baseline                          Experiment
-1  Library Rain (4.43)               Library Rain (4.43)
-2  Midnight Coding (4.29)            Midnight Coding (4.21)
-3  Focus Flow (3.34)                 Spacewalk Thoughts (3.32)
-4  Spacewalk Thoughts (2.39)         Focus Flow (3.29)
-5  Coffee Shop Stories (1.43)        Coffee Shop Stories (2.40)
-
-========================================================================
-Profile: Intense Rock
-#  Baseline                          Experiment
-1  Storm Runner (3.99)               Storm Runner (3.98)
-2  Basement Riot (2.98)              Basement Riot (2.96)
-3  Gym Hero (1.97)                   Gym Hero (2.94)
-4  Pulse Reactor (0.95)              Pulse Reactor (1.90)
-5  Iron Lung Parade (0.93)           Iron Lung Parade (1.86)
-
-========================================================================
-Profile: Contradictory (Ambient + Angry + 0.95)
-#  Baseline                          Experiment
-1  Spacewalk Thoughts (2.33)         Iron Lung Parade (2.96)
-2  Iron Lung Parade (1.98)           Basement Riot (2.86)
-3  Basement Riot (1.93)              Pulse Reactor (2.00)
-4  Pulse Reactor (1.00)              Gym Hero (1.96)
-5  Gym Hero (0.98)                   Storm Runner (1.92)
+```bash
+python3 -m src.main --experiment
 ```
 
-**What changed:**
+The original scoring weights were preserved, so the experiment did not permanently change the default recommendations.
 
-- **High-Energy Pop:** *Rooftop Lights* (indie pop, happy, 0.76) moved from #4 to #3 and passed *Neon Heartbreak* (pop, **sad**, 0.64). That feels like a better result: a happy song with the right energy now beats a sad song that only shares the genre label.
-- **Chill Lofi:** *Spacewalk Thoughts* (ambient, chill) moved from #4 to #3, passing *Focus Flow* (lofi, focused). Mood + energy started to matter more than the genre label.
-- **Intense Rock:** Order stayed the same, but the gap between #2 *Basement Riot* (2.96) and #3 *Gym Hero* (2.94) shrank from 1.01 to 0.02. A pop song almost passed a rock song for a rock fan.
-- **Contradictory profile:** the biggest change. At baseline *Spacewalk Thoughts* was #1 even though its energy (0.28) is far from the 0.95 target — the +2.0 genre match carried it. With the experiment weights it fell out of the top 5 completely, *Iron Lung Parade* (metal, angry, 0.97) took #1, and *Storm Runner* entered at #5.
+### Experiment Results
 
-**Conclusion:** the baseline is strongly genre-driven. Halving genre weight made results more "vibe"-based and fixed the contradictory case, but it also made genre almost irrelevant for the rock fan. I kept the baseline as the default and left the experiment as an opt-in flag.
+The following results were recorded from the CLI experiment. I simplified the table layout (the terminal labels the rank column `#`), but the rankings and scores are unchanged.
 
-### Comparing profiles
+**High-Energy Pop**
 
-- **High-Energy Pop vs. Intense Rock:** Both want high energy (0.85 vs. 0.90), so they share two songs: *Gym Hero* (#2 for pop, #3 for rock) and *Basement Riot* (#5 for pop, #2 for rock). *Gym Hero* gets the genre bonus for pop but only the mood bonus for rock; *Basement Riot* is the reverse. The +2.0 genre weight is what decides which list ranks each song higher.
-- **Chill Lofi vs. Intense Rock:** No overlap at all. Every Chill Lofi result has energy between 0.28 and 0.42, and every Intense Rock result has energy between 0.88 and 0.97. When genre, mood, and energy all point the same way, the profiles separate cleanly.
-- **Intense Rock vs. Contradictory:** Positions 2–5 of the contradictory list are the same high-energy songs that show up for Intense Rock (metal, rock, EDM, pop) because mood "angry" and energy 0.95 pull toward them. But #1 is a quiet ambient track, only because of the genre bonus. This is the clearest example of genre dominance.
+```text
+Rank  Baseline                     Experiment
+1     Sunrise City (3.97)          Sunrise City (3.94)
+2     Gym Hero (2.92)              Gym Hero (2.84)
+3     Neon Heartbreak (2.79)       Rooftop Lights (2.82)
+4     Rooftop Lights (1.91)        Neon Heartbreak (2.58)
+5     Basement Riot (0.97)         Basement Riot (1.94)
+```
+
+**Chill Lofi**
+
+```text
+Rank  Baseline                     Experiment
+1     Library Rain (4.43)          Library Rain (4.43)
+2     Midnight Coding (4.29)       Midnight Coding (4.21)
+3     Focus Flow (3.34)            Spacewalk Thoughts (3.32)
+4     Spacewalk Thoughts (2.39)    Focus Flow (3.29)
+5     Coffee Shop Stories (1.43)   Coffee Shop Stories (2.40)
+```
+
+**Intense Rock**
+
+```text
+Rank  Baseline                     Experiment
+1     Storm Runner (3.99)          Storm Runner (3.98)
+2     Basement Riot (2.98)         Basement Riot (2.96)
+3     Gym Hero (1.97)              Gym Hero (2.94)
+4     Pulse Reactor (0.95)         Pulse Reactor (1.90)
+5     Iron Lung Parade (0.93)      Iron Lung Parade (1.86)
+```
+
+**Contradictory Preferences**
+
+```text
+Rank  Baseline                     Experiment
+1     Spacewalk Thoughts (2.33)    Iron Lung Parade (2.96)
+2     Iron Lung Parade (1.98)      Basement Riot (2.86)
+3     Basement Riot (1.93)         Pulse Reactor (2.00)
+4     Pulse Reactor (1.00)         Gym Hero (1.96)
+5     Gym Hero (0.98)              Storm Runner (1.92)
+```
+
+### What Changed?
+
+**High-Energy Pop:** *Rooftop Lights* moved from fourth to third, ahead of *Neon Heartbreak*. This made sense because *Rooftop Lights* matched the happy mood and had energy closer to the target, even though its genre was labeled indie pop instead of pop.
+
+**Chill Lofi:** *Spacewalk Thoughts* moved above *Focus Flow*. Its matching mood and energy became more valuable than the exact genre match.
+
+**Intense Rock:** The order stayed the same, but *Gym Hero* came much closer to *Basement Riot*. Their scores differed by only 0.02 points in the experiment.
+
+**Contradictory Preferences:** This profile had the biggest change. *Spacewalk Thoughts* fell outside the top five, while *Iron Lung Parade* became the highest-ranked song because it matched the angry mood and had energy close to the target.
+
+### What I Learned from the Experiment
+
+The experiment showed that choosing weights is not just a mathematical decision. It affects what the system considers important.
+
+Increasing the energy weight improved the contradictory profile, but it also reduced the advantage of matching the requested genre for the rock profile.
+
+This suggests that different users might benefit from different scoring weights rather than forcing everyone to use the same scoring rules.
 
 ---
 
-## Limitations and Risks
+## Comparing User Profiles
 
-- **Tiny catalog (20 fictional songs).** Most genres have one song, so a metal or classical fan gets one real match and then filler picked mostly by energy (e.g. *Basement Riot*, a rock/angry song, is #5 for the High-Energy Pop profile with no genre or mood match).
-- **Genre dominance.** A genre match alone can outrank a song that matches mood and energy nearly perfectly (contradictory profile above).
-- **Exact string matching.** `indie pop` ≠ `pop`, `chill` ≠ `relaxed`. Related labels get zero credit.
-- **Filter bubble.** Top results repeat the same genre (all top 3 for Chill Lofi are lofi; 2 of those are by the same artist, LoRoom). There is no diversity rule.
-- **Ignored features.** Tempo, valence, and danceability are loaded but not scored. No lyrics, language, or listening history.
-- **Uneven coverage.** Lofi already had 3 songs in the starter data, so lofi users get better results than users of genres with 1 song.
+### High-Energy Pop vs. Intense Rock
 
-See the [model card](model_card.md) for more detail.
+These profiles requested different genres but both preferred high-energy music.
+
+They shared two songs in their top five: *Gym Hero* and *Basement Riot*.
+
+*Gym Hero* received the genre bonus for the pop profile, while *Basement Riot* received it for the rock profile. This explains why their positions differed.
+
+### Chill Lofi vs. Intense Rock
+
+These profiles shared no songs in their top five.
+
+The Chill Lofi recommendations had energy levels between 0.28 and 0.42, while the Intense Rock recommendations ranged from 0.88 to 0.97.
+
+This shows that the recommender can produce noticeably different results when users have contrasting preferences.
+
+### Intense Rock vs. Contradictory Preferences
+
+Both profiles included high-energy preferences.
+
+As a result, several energetic songs appeared in both recommendation lists.
+
+However, the contradictory profile ranked a low-energy ambient song first because of the genre bonus. This highlighted how heavily the original algorithm depended on genre matching.
 
 ---
 
-## Reflection
+## Automated Testing
 
-Read and complete `model_card.md`:
+I used Claude Code to write and run a `pytest` suite for the recommender.
 
-[**Model Card**](model_card.md)
+The tests cover:
 
-<!-- Julius: rewrite these two paragraphs in your own words before submitting. -->
+- Loading songs from a CSV file.
+- Converting numerical attributes into the correct Python types.
+- Handling invalid or missing data.
+- Calculating genre and mood scores.
+- Calculating energy similarity.
+- Applying the optional acoustic bonus.
+- Returning explanations for recommendation scores.
+- Sorting recommendations correctly.
+- Returning the requested number of songs.
+- Handling empty catalogs.
+- Resolving tied scores consistently.
+- Ensuring experimental weights do not modify the default scoring system.
 
-Building this showed that a recommender's "taste" is mostly the weights someone picks. Turning genre, mood, and energy into numbers was easy; deciding that genre is worth 2 points and mood 1 point was a judgment call, and the weight experiment showed that one change to those numbers moved a song from #1 to off the list. The explanation strings made this visible — without them, the contradictory profile's #1 pick would just look like a bad recommendation instead of an obvious side effect of the genre weight.
+### Run Tests
 
-Bias shows up even in a 20-song toy. Genres that had more songs in the data (lofi, pop, rock) get better results than genres with one song, and exact label matching treats "indie pop" as unrelated to "pop." In a real app with millions of songs, the same kinds of choices would decide which artists get surfaced and which get buried, and users would mostly never see the reasons.
+```bash
+python3 -m pytest
+```
+
+### Test Results
+
+```text
+20 passed
+```
+
+All 20 automated tests passed during the final implementation run.
+
+The test suite includes the starter tests and additional tests created to verify the new functionality.
+
+---
+
+## Limitations and Potential Biases
+
+Although VibeMatch produces understandable recommendations, it has several limitations.
+
+**1. Small dataset**
+
+The catalog only contains 20 fictional songs. Some genres have only one song, making it difficult to recommend several relevant tracks for users with those preferences.
+
+**2. Genre dominance**
+
+Genre matching contributes more points than any other individual feature. This can cause songs with matching genres to rank higher even when their mood and energy are very different from what the user requested.
+
+**3. Exact label matching**
+
+The system treats similar genres and moods as completely different labels.
+
+For example, `indie pop` does not match `pop`, and `relaxed` does not match `chill`.
+
+**4. Limited recommendation diversity**
+
+The algorithm can recommend several songs from the same genre or artist.
+
+For example, two of the top three Chill Lofi recommendations were by LoRoom.
+
+This could create a filter bubble where users repeatedly see similar music.
+
+**5. Unused musical features**
+
+Tempo, valence, and danceability are present in the dataset but are not included in the scoring algorithm.
+
+**6. Limited user preferences**
+
+A taste profile can represent only one favorite genre and mood at a time.
+
+Real listeners often enjoy several styles depending on their activities or current moods.
+
+For a more detailed discussion, see the [Model Card](model_card.md).
+
+---
+
+## Future Improvements
+
+There are several ways I would improve VibeMatch if I continued developing it.
+
+- Allow users to select multiple favorite genres and moods.
+- Award partial points for related genres or moods.
+- Include tempo, valence, and danceability in the scoring formula.
+- Add a diversity rule to avoid repeated artists or genres.
+- Expand the catalog with more songs from different cultures and musical styles.
+- Introduce user feedback through likes, dislikes, and skips.
+- Experiment with adjustable weights for different users.
+
+A future version could also include a simple interface where users select their preferences and immediately see their recommendations.
+
+---
+
+## Personal Reflection
+
+One of the biggest things I learned from this project was that a recommendation algorithm does not necessarily understand what music a person will enjoy. It follows the rules and weights that were built into it.
+
+The contradictory profile made this clear to me. I expected an angry, high-energy song to rank highly, but the system recommended a calm ambient song first because the genre was worth two points. Looking at the explanations helped me understand why that happened.
+
+I also found the weight experiment interesting. Changing only two values in the scoring system was enough to change several recommendations. It showed me that even a simple algorithm can behave quite differently depending on how its features are weighted.
+
+I used Claude Code to help build the recommender, expand the dataset, generate tests, and document the evaluation results. The AI assistance made it possible to implement and test several parts of the project in one workflow. Reviewing the scoring explanations and experiment results was important because generating working code alone does not guarantee that the recommendations make sense.
+
+Another thing I noticed was how much the dataset affects the results. Some genres were represented by multiple songs, while others had only one. This meant that the algorithm had more matching options for some users than for others, even though the same scoring rules were applied.
+
+If I continued the project, I would focus on making the user profiles more flexible and giving users greater control over what matters most in their recommendations.
+
+Overall, VibeMatch helped me better understand how data, user preferences, scoring rules, and ranking algorithms work together to generate recommendations. It also showed me why testing and evaluating an algorithm matters just as much as getting the code to run.
+
+---
+
+## AI-Assisted Development
+
+Claude Code was used to assist with the implementation and testing of the project.
+
+The AI-assisted workflow included reviewing the starter repository, implementing the scoring functions, expanding the dataset, creating automated tests, running the CLI experiments, and preparing documentation.
+
+The implementation was checked using automated tests and actual recommendation outputs.
+
+The file `ai_interactions.md` contains additional information about the AI collaboration process.
+
+---
+
+## Model Card
+
+The project's Model Card explains the intended use, dataset, scoring rules, evaluation process, potential biases, limitations, and future improvements.
+
+[View the Model Card](model_card.md)
+
+---
+
+## Technologies Used
+
+- Python
+- Python CSV Module
+- Python Dataclasses
+- Object-Oriented Programming
+- Content-Based Recommendation Algorithms
+- pytest
+- Mermaid
+- Git and GitHub
+- Claude Code
+
+---
+
+## Repository
+
+**GitHub:** https://github.com/JuliusQuarshie/ai110-module3show-musicrecommendersimulation-starter
+
+The repository includes the recommendation algorithm, music dataset, CLI application, automated tests, README documentation, Model Card, and AI interaction log.

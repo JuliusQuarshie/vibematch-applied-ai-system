@@ -23,12 +23,12 @@ One long prompt listing the five phases, the scoring rule (+2.0 genre, +1.0 mood
 - `src/main.py` — fixed the import (`from recommender` → `from src.recommender`) so `python -m src.main` runs; added 4 profiles and an `--experiment` flag.
 - `tests/test_scoring.py` (new, 18 tests) and `pytest.ini` (new, so `pytest` can import `src`).
 - `README.md`, `model_card.md`, this file.
-- Commands run: `python -m src.main`, `python -m src.main --experiment`, `python -m pytest` (20 passed). The CLI output in the README was pasted in by script from the saved terminal output rather than retyped.
+- Commands run: `python -m src.main`, `python -m src.main --experiment`, `python -m pytest` (20 passed).
 
 **What did you verify or fix manually?**
 
 - Agent self-checks: the starter `main.py` import would have crashed under `python -m src.main`; the agent found and fixed it. It also removed a leftover placeholder line it had written in `Recommender.recommend` before running anything.
-- <!-- Julius: add what you personally checked, e.g. re-ran the commands, read the scoring code, compared README output to your terminal, edited the reflection. -->
+- I asked Claude Code for a critical review before submission, then directed the fixes: removing a leftover AI comment, correcting a claim about how the CLI output was copied into the README, fixing a contradiction in the model card about adjustable weights, and making sure the docs describe the AI assistance accurately.
 
 ---
 
