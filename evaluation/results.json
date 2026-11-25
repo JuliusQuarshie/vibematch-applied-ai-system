@@ -1,0 +1,1416 @@
+{
+  "description": "VibeMatch 1.0 baseline vs. VibeMatch 2.0 final recommendations (k=5). Metrics are rule-based agreement with stated preferences, not user satisfaction.",
+  "command": "python -m src.evaluate",
+  "catalog": {
+    "path": "data/songs.csv",
+    "songs": 20,
+    "warnings": []
+  },
+  "k": 5,
+  "profiles": [
+    {
+      "profile": "High-Energy Pop",
+      "input": {
+        "genre": "pop",
+        "mood": "happy",
+        "target_energy": 0.85
+      },
+      "outcome": "no revision needed",
+      "revision_activated": false,
+      "revision_accepted": false,
+      "final_config": "default weights",
+      "baseline_titles": [
+        "Sunrise City",
+        "Gym Hero",
+        "Neon Heartbreak",
+        "Rooftop Lights",
+        "Basement Riot"
+      ],
+      "final_titles": [
+        "Sunrise City",
+        "Gym Hero",
+        "Neon Heartbreak",
+        "Rooftop Lights",
+        "Basement Riot"
+      ],
+      "baseline_verdict": "good",
+      "final_verdict": "good",
+      "comparison": {
+        "genre_matches": {
+          "baseline": 3,
+          "final": 3,
+          "change": "same"
+        },
+        "mood_matches": {
+          "baseline": 2,
+          "final": 2,
+          "change": "same"
+        },
+        "mean_energy_distance": {
+          "baseline": 0.088,
+          "final": 0.088,
+          "change": "same"
+        },
+        "energy_violations": {
+          "baseline": 0,
+          "final": 0,
+          "change": "same"
+        },
+        "off_target": {
+          "baseline": 0,
+          "final": 0,
+          "change": "same"
+        },
+        "unique_artists": {
+          "baseline": 5,
+          "final": 5,
+          "change": "same"
+        },
+        "unique_genres": {
+          "baseline": 3,
+          "final": 3,
+          "change": "same"
+        },
+        "warnings": {
+          "baseline": 0,
+          "final": 0,
+          "change": "same"
+        }
+      },
+      "baseline_issues": [],
+      "final_issues": [],
+      "limitations": [
+        "The catalog has only 3 'pop' song(s); 2 slot(s) had to be filled from other genres."
+      ],
+      "attempts": [],
+      "audit": [
+        "validated input: fields=['genre', 'mood', 'target_energy'], k=5, catalog=20 songs",
+        "baseline (default weights): verdict=good, warnings=[]",
+        "no fixable issues found; baseline kept",
+        "final (default weights): verdict=good, outcome=no revision needed"
+      ],
+      "detail": {
+        "baseline": [
+          {
+            "rank": 1,
+            "id": 1,
+            "title": "Sunrise City",
+            "artist": "Neon Echo",
+            "genre": "pop",
+            "mood": "happy",
+            "energy": 0.82,
+            "score": 3.97,
+            "explanation": "genre matches 'pop' (+2.00); mood matches 'happy' (+1.00); energy 0.82 vs target 0.85 (+0.97)",
+            "adjustment": ""
+          },
+          {
+            "rank": 2,
+            "id": 5,
+            "title": "Gym Hero",
+            "artist": "Max Pulse",
+            "genre": "pop",
+            "mood": "intense",
+            "energy": 0.93,
+            "score": 2.92,
+            "explanation": "genre matches 'pop' (+2.00); mood 'intense' is not 'happy' (+0.00); energy 0.93 vs target 0.85 (+0.92)",
+            "adjustment": ""
+          },
+          {
+            "rank": 3,
+            "id": 19,
+            "title": "Neon Heartbreak",
+            "artist": "Glass Arcade",
+            "genre": "pop",
+            "mood": "sad",
+            "energy": 0.64,
+            "score": 2.79,
+            "explanation": "genre matches 'pop' (+2.00); mood 'sad' is not 'happy' (+0.00); energy 0.64 vs target 0.85 (+0.79)",
+            "adjustment": ""
+          },
+          {
+            "rank": 4,
+            "id": 10,
+            "title": "Rooftop Lights",
+            "artist": "Indigo Parade",
+            "genre": "indie pop",
+            "mood": "happy",
+            "energy": 0.76,
+            "score": 1.91,
+            "explanation": "genre 'indie pop' is not 'pop' (+0.00); mood matches 'happy' (+1.00); energy 0.76 vs target 0.85 (+0.91)",
+            "adjustment": ""
+          },
+          {
+            "rank": 5,
+            "id": 20,
+            "title": "Basement Riot",
+            "artist": "Cutthroat Choir",
+            "genre": "rock",
+            "mood": "angry",
+            "energy": 0.88,
+            "score": 0.97,
+            "explanation": "genre 'rock' is not 'pop' (+0.00); mood 'angry' is not 'happy' (+0.00); energy 0.88 vs target 0.85 (+0.97)",
+            "adjustment": ""
+          }
+        ],
+        "final": [
+          {
+            "rank": 1,
+            "id": 1,
+            "title": "Sunrise City",
+            "artist": "Neon Echo",
+            "genre": "pop",
+            "mood": "happy",
+            "energy": 0.82,
+            "score": 3.97,
+            "explanation": "genre matches 'pop' (+2.00); mood matches 'happy' (+1.00); energy 0.82 vs target 0.85 (+0.97)",
+            "adjustment": ""
+          },
+          {
+            "rank": 2,
+            "id": 5,
+            "title": "Gym Hero",
+            "artist": "Max Pulse",
+            "genre": "pop",
+            "mood": "intense",
+            "energy": 0.93,
+            "score": 2.92,
+            "explanation": "genre matches 'pop' (+2.00); mood 'intense' is not 'happy' (+0.00); energy 0.93 vs target 0.85 (+0.92)",
+            "adjustment": ""
+          },
+          {
+            "rank": 3,
+            "id": 19,
+            "title": "Neon Heartbreak",
+            "artist": "Glass Arcade",
+            "genre": "pop",
+            "mood": "sad",
+            "energy": 0.64,
+            "score": 2.79,
+            "explanation": "genre matches 'pop' (+2.00); mood 'sad' is not 'happy' (+0.00); energy 0.64 vs target 0.85 (+0.79)",
+            "adjustment": ""
+          },
+          {
+            "rank": 4,
+            "id": 10,
+            "title": "Rooftop Lights",
+            "artist": "Indigo Parade",
+            "genre": "indie pop",
+            "mood": "happy",
+            "energy": 0.76,
+            "score": 1.91,
+            "explanation": "genre 'indie pop' is not 'pop' (+0.00); mood matches 'happy' (+1.00); energy 0.76 vs target 0.85 (+0.91)",
+            "adjustment": ""
+          },
+          {
+            "rank": 5,
+            "id": 20,
+            "title": "Basement Riot",
+            "artist": "Cutthroat Choir",
+            "genre": "rock",
+            "mood": "angry",
+            "energy": 0.88,
+            "score": 0.97,
+            "explanation": "genre 'rock' is not 'pop' (+0.00); mood 'angry' is not 'happy' (+0.00); energy 0.88 vs target 0.85 (+0.97)",
+            "adjustment": ""
+          }
+        ],
+        "baseline_evaluation": {
+          "verdict": "good",
+          "metrics": {
+            "n": 5,
+            "genre_matches": 3,
+            "achievable_genre_matches": 3,
+            "mood_matches": 2,
+            "achievable_mood_matches": 2,
+            "mean_energy_distance": 0.088,
+            "max_energy_distance": 0.21,
+            "energy_violations": 0,
+            "off_target": 0,
+            "unique_artists": 5,
+            "max_artist_repeat": 1,
+            "unique_genres": 3,
+            "duplicate_songs": 0
+          },
+          "issues": [
+            {
+              "code": "LIMITED_GENRE_COVERAGE",
+              "severity": "info",
+              "message": "The catalog has only 3 'pop' song(s); 2 slot(s) had to be filled from other genres."
+            }
+          ],
+          "error": null
+        },
+        "final_evaluation": {
+          "verdict": "good",
+          "metrics": {
+            "n": 5,
+            "genre_matches": 3,
+            "achievable_genre_matches": 3,
+            "mood_matches": 2,
+            "achievable_mood_matches": 2,
+            "mean_energy_distance": 0.088,
+            "max_energy_distance": 0.21,
+            "energy_violations": 0,
+            "off_target": 0,
+            "unique_artists": 5,
+            "max_artist_repeat": 1,
+            "unique_genres": 3,
+            "duplicate_songs": 0
+          },
+          "issues": [
+            {
+              "code": "LIMITED_GENRE_COVERAGE",
+              "severity": "info",
+              "message": "The catalog has only 3 'pop' song(s); 2 slot(s) had to be filled from other genres."
+            }
+          ],
+          "error": null
+        }
+      }
+    },
+    {
+      "profile": "Chill Lofi",
+      "input": {
+        "genre": "lofi",
+        "mood": "chill",
+        "target_energy": 0.35,
+        "likes_acoustic": true
+      },
+      "outcome": "revision rejected; baseline kept",
+      "revision_activated": true,
+      "revision_accepted": false,
+      "final_config": "default weights",
+      "baseline_titles": [
+        "Library Rain",
+        "Midnight Coding",
+        "Focus Flow",
+        "Spacewalk Thoughts",
+        "Coffee Shop Stories"
+      ],
+      "final_titles": [
+        "Library Rain",
+        "Midnight Coding",
+        "Focus Flow",
+        "Spacewalk Thoughts",
+        "Coffee Shop Stories"
+      ],
+      "baseline_verdict": "acceptable",
+      "final_verdict": "acceptable",
+      "comparison": {
+        "genre_matches": {
+          "baseline": 3,
+          "final": 3,
+          "change": "same"
+        },
+        "mood_matches": {
+          "baseline": 3,
+          "final": 3,
+          "change": "same"
+        },
+        "mean_energy_distance": {
+          "baseline": 0.042,
+          "final": 0.042,
+          "change": "same"
+        },
+        "energy_violations": {
+          "baseline": 0,
+          "final": 0,
+          "change": "same"
+        },
+        "off_target": {
+          "baseline": 0,
+          "final": 0,
+          "change": "same"
+        },
+        "unique_artists": {
+          "baseline": 4,
+          "final": 4,
+          "change": "same"
+        },
+        "unique_genres": {
+          "baseline": 3,
+          "final": 3,
+          "change": "same"
+        },
+        "warnings": {
+          "baseline": 1,
+          "final": 1,
+          "change": "same"
+        }
+      },
+      "baseline_issues": [
+        "LoRoom appears 2 times in the list."
+      ],
+      "final_issues": [
+        "LoRoom appears 2 times in the list."
+      ],
+      "limitations": [
+        "The catalog has only 3 'lofi' song(s); 2 slot(s) had to be filled from other genres."
+      ],
+      "attempts": [
+        {
+          "strategy": "diversity_rerank",
+          "targeted_issues": [
+            "REPEATED_ARTIST"
+          ],
+          "titles": [
+            "Library Rain",
+            "Midnight Coding",
+            "Spacewalk Thoughts",
+            "Focus Flow",
+            "Coffee Shop Stories"
+          ],
+          "accepted": false,
+          "reasons": [
+            "Q1 failed: warnings did not decrease (1 -> 1)"
+          ]
+        }
+      ],
+      "audit": [
+        "validated input: fields=['genre', 'likes_acoustic', 'mood', 'target_energy'], k=5, catalog=20 songs",
+        "baseline (default weights): verdict=acceptable, warnings=['REPEATED_ARTIST']",
+        "attempt 1: diversity_rerank targeting ['REPEATED_ARTIST'] -> REJECTED (Q1 failed: warnings did not decrease (1 -> 1))",
+        "final (default weights): verdict=acceptable, outcome=revision rejected; baseline kept"
+      ],
+      "detail": {
+        "baseline": [
+          {
+            "rank": 1,
+            "id": 4,
+            "title": "Library Rain",
+            "artist": "Paper Lanterns",
+            "genre": "lofi",
+            "mood": "chill",
+            "energy": 0.35,
+            "score": 4.43,
+            "explanation": "genre matches 'lofi' (+2.00); mood matches 'chill' (+1.00); energy 0.35 vs target 0.35 (+1.00); acoustic fit 0.86 (+0.43)",
+            "adjustment": ""
+          },
+          {
+            "rank": 2,
+            "id": 2,
+            "title": "Midnight Coding",
+            "artist": "LoRoom",
+            "genre": "lofi",
+            "mood": "chill",
+            "energy": 0.42,
+            "score": 4.285,
+            "explanation": "genre matches 'lofi' (+2.00); mood matches 'chill' (+1.00); energy 0.42 vs target 0.35 (+0.93); acoustic fit 0.71 (+0.35)",
+            "adjustment": ""
+          },
+          {
+            "rank": 3,
+            "id": 9,
+            "title": "Focus Flow",
+            "artist": "LoRoom",
+            "genre": "lofi",
+            "mood": "focused",
+            "energy": 0.4,
+            "score": 3.34,
+            "explanation": "genre matches 'lofi' (+2.00); mood 'focused' is not 'chill' (+0.00); energy 0.40 vs target 0.35 (+0.95); acoustic fit 0.78 (+0.39)",
+            "adjustment": ""
+          },
+          {
+            "rank": 4,
+            "id": 6,
+            "title": "Spacewalk Thoughts",
+            "artist": "Orbit Bloom",
+            "genre": "ambient",
+            "mood": "chill",
+            "energy": 0.28,
+            "score": 2.39,
+            "explanation": "genre 'ambient' is not 'lofi' (+0.00); mood matches 'chill' (+1.00); energy 0.28 vs target 0.35 (+0.93); acoustic fit 0.92 (+0.46)",
+            "adjustment": ""
+          },
+          {
+            "rank": 5,
+            "id": 7,
+            "title": "Coffee Shop Stories",
+            "artist": "Slow Stereo",
+            "genre": "jazz",
+            "mood": "relaxed",
+            "energy": 0.37,
+            "score": 1.425,
+            "explanation": "genre 'jazz' is not 'lofi' (+0.00); mood 'relaxed' is not 'chill' (+0.00); energy 0.37 vs target 0.35 (+0.98); acoustic fit 0.89 (+0.45)",
+            "adjustment": ""
+          }
+        ],
+        "final": [
+          {
+            "rank": 1,
+            "id": 4,
+            "title": "Library Rain",
+            "artist": "Paper Lanterns",
+            "genre": "lofi",
+            "mood": "chill",
+            "energy": 0.35,
+            "score": 4.43,
+            "explanation": "genre matches 'lofi' (+2.00); mood matches 'chill' (+1.00); energy 0.35 vs target 0.35 (+1.00); acoustic fit 0.86 (+0.43)",
+            "adjustment": ""
+          },
+          {
+            "rank": 2,
+            "id": 2,
+            "title": "Midnight Coding",
+            "artist": "LoRoom",
+            "genre": "lofi",
+            "mood": "chill",
+            "energy": 0.42,
+            "score": 4.285,
+            "explanation": "genre matches 'lofi' (+2.00); mood matches 'chill' (+1.00); energy 0.42 vs target 0.35 (+0.93); acoustic fit 0.71 (+0.35)",
+            "adjustment": ""
+          },
+          {
+            "rank": 3,
+            "id": 9,
+            "title": "Focus Flow",
+            "artist": "LoRoom",
+            "genre": "lofi",
+            "mood": "focused",
+            "energy": 0.4,
+            "score": 3.34,
+            "explanation": "genre matches 'lofi' (+2.00); mood 'focused' is not 'chill' (+0.00); energy 0.40 vs target 0.35 (+0.95); acoustic fit 0.78 (+0.39)",
+            "adjustment": ""
+          },
+          {
+            "rank": 4,
+            "id": 6,
+            "title": "Spacewalk Thoughts",
+            "artist": "Orbit Bloom",
+            "genre": "ambient",
+            "mood": "chill",
+            "energy": 0.28,
+            "score": 2.39,
+            "explanation": "genre 'ambient' is not 'lofi' (+0.00); mood matches 'chill' (+1.00); energy 0.28 vs target 0.35 (+0.93); acoustic fit 0.92 (+0.46)",
+            "adjustment": ""
+          },
+          {
+            "rank": 5,
+            "id": 7,
+            "title": "Coffee Shop Stories",
+            "artist": "Slow Stereo",
+            "genre": "jazz",
+            "mood": "relaxed",
+            "energy": 0.37,
+            "score": 1.425,
+            "explanation": "genre 'jazz' is not 'lofi' (+0.00); mood 'relaxed' is not 'chill' (+0.00); energy 0.37 vs target 0.35 (+0.98); acoustic fit 0.89 (+0.45)",
+            "adjustment": ""
+          }
+        ],
+        "baseline_evaluation": {
+          "verdict": "acceptable",
+          "metrics": {
+            "n": 5,
+            "genre_matches": 3,
+            "achievable_genre_matches": 3,
+            "mood_matches": 3,
+            "achievable_mood_matches": 3,
+            "mean_energy_distance": 0.042,
+            "max_energy_distance": 0.07,
+            "energy_violations": 0,
+            "off_target": 0,
+            "unique_artists": 4,
+            "max_artist_repeat": 2,
+            "unique_genres": 3,
+            "duplicate_songs": 0
+          },
+          "issues": [
+            {
+              "code": "REPEATED_ARTIST",
+              "severity": "warning",
+              "message": "LoRoom appears 2 times in the list."
+            },
+            {
+              "code": "LIMITED_GENRE_COVERAGE",
+              "severity": "info",
+              "message": "The catalog has only 3 'lofi' song(s); 2 slot(s) had to be filled from other genres."
+            }
+          ],
+          "error": null
+        },
+        "final_evaluation": {
+          "verdict": "acceptable",
+          "metrics": {
+            "n": 5,
+            "genre_matches": 3,
+            "achievable_genre_matches": 3,
+            "mood_matches": 3,
+            "achievable_mood_matches": 3,
+            "mean_energy_distance": 0.042,
+            "max_energy_distance": 0.07,
+            "energy_violations": 0,
+            "off_target": 0,
+            "unique_artists": 4,
+            "max_artist_repeat": 2,
+            "unique_genres": 3,
+            "duplicate_songs": 0
+          },
+          "issues": [
+            {
+              "code": "REPEATED_ARTIST",
+              "severity": "warning",
+              "message": "LoRoom appears 2 times in the list."
+            },
+            {
+              "code": "LIMITED_GENRE_COVERAGE",
+              "severity": "info",
+              "message": "The catalog has only 3 'lofi' song(s); 2 slot(s) had to be filled from other genres."
+            }
+          ],
+          "error": null
+        }
+      }
+    },
+    {
+      "profile": "Intense Rock",
+      "input": {
+        "genre": "rock",
+        "mood": "intense",
+        "target_energy": 0.9
+      },
+      "outcome": "no revision needed",
+      "revision_activated": false,
+      "revision_accepted": false,
+      "final_config": "default weights",
+      "baseline_titles": [
+        "Storm Runner",
+        "Basement Riot",
+        "Gym Hero",
+        "Pulse Reactor",
+        "Iron Lung Parade"
+      ],
+      "final_titles": [
+        "Storm Runner",
+        "Basement Riot",
+        "Gym Hero",
+        "Pulse Reactor",
+        "Iron Lung Parade"
+      ],
+      "baseline_verdict": "good",
+      "final_verdict": "good",
+      "comparison": {
+        "genre_matches": {
+          "baseline": 2,
+          "final": 2,
+          "change": "same"
+        },
+        "mood_matches": {
+          "baseline": 2,
+          "final": 2,
+          "change": "same"
+        },
+        "mean_energy_distance": {
+          "baseline": 0.036,
+          "final": 0.036,
+          "change": "same"
+        },
+        "energy_violations": {
+          "baseline": 0,
+          "final": 0,
+          "change": "same"
+        },
+        "off_target": {
+          "baseline": 0,
+          "final": 0,
+          "change": "same"
+        },
+        "unique_artists": {
+          "baseline": 5,
+          "final": 5,
+          "change": "same"
+        },
+        "unique_genres": {
+          "baseline": 4,
+          "final": 4,
+          "change": "same"
+        },
+        "warnings": {
+          "baseline": 0,
+          "final": 0,
+          "change": "same"
+        }
+      },
+      "baseline_issues": [],
+      "final_issues": [],
+      "limitations": [
+        "The catalog has only 2 'rock' song(s); 3 slot(s) had to be filled from other genres."
+      ],
+      "attempts": [],
+      "audit": [
+        "validated input: fields=['genre', 'mood', 'target_energy'], k=5, catalog=20 songs",
+        "baseline (default weights): verdict=good, warnings=[]",
+        "no fixable issues found; baseline kept",
+        "final (default weights): verdict=good, outcome=no revision needed"
+      ],
+      "detail": {
+        "baseline": [
+          {
+            "rank": 1,
+            "id": 3,
+            "title": "Storm Runner",
+            "artist": "Voltline",
+            "genre": "rock",
+            "mood": "intense",
+            "energy": 0.91,
+            "score": 3.99,
+            "explanation": "genre matches 'rock' (+2.00); mood matches 'intense' (+1.00); energy 0.91 vs target 0.90 (+0.99)",
+            "adjustment": ""
+          },
+          {
+            "rank": 2,
+            "id": 20,
+            "title": "Basement Riot",
+            "artist": "Cutthroat Choir",
+            "genre": "rock",
+            "mood": "angry",
+            "energy": 0.88,
+            "score": 2.98,
+            "explanation": "genre matches 'rock' (+2.00); mood 'angry' is not 'intense' (+0.00); energy 0.88 vs target 0.90 (+0.98)",
+            "adjustment": ""
+          },
+          {
+            "rank": 3,
+            "id": 5,
+            "title": "Gym Hero",
+            "artist": "Max Pulse",
+            "genre": "pop",
+            "mood": "intense",
+            "energy": 0.93,
+            "score": 1.97,
+            "explanation": "genre 'pop' is not 'rock' (+0.00); mood matches 'intense' (+1.00); energy 0.93 vs target 0.90 (+0.97)",
+            "adjustment": ""
+          },
+          {
+            "rank": 4,
+            "id": 15,
+            "title": "Pulse Reactor",
+            "artist": "Kilowatt Kid",
+            "genre": "edm",
+            "mood": "euphoric",
+            "energy": 0.95,
+            "score": 0.95,
+            "explanation": "genre 'edm' is not 'rock' (+0.00); mood 'euphoric' is not 'intense' (+0.00); energy 0.95 vs target 0.90 (+0.95)",
+            "adjustment": ""
+          },
+          {
+            "rank": 5,
+            "id": 13,
+            "title": "Iron Lung Parade",
+            "artist": "Grave Engine",
+            "genre": "metal",
+            "mood": "angry",
+            "energy": 0.97,
+            "score": 0.93,
+            "explanation": "genre 'metal' is not 'rock' (+0.00); mood 'angry' is not 'intense' (+0.00); energy 0.97 vs target 0.90 (+0.93)",
+            "adjustment": ""
+          }
+        ],
+        "final": [
+          {
+            "rank": 1,
+            "id": 3,
+            "title": "Storm Runner",
+            "artist": "Voltline",
+            "genre": "rock",
+            "mood": "intense",
+            "energy": 0.91,
+            "score": 3.99,
+            "explanation": "genre matches 'rock' (+2.00); mood matches 'intense' (+1.00); energy 0.91 vs target 0.90 (+0.99)",
+            "adjustment": ""
+          },
+          {
+            "rank": 2,
+            "id": 20,
+            "title": "Basement Riot",
+            "artist": "Cutthroat Choir",
+            "genre": "rock",
+            "mood": "angry",
+            "energy": 0.88,
+            "score": 2.98,
+            "explanation": "genre matches 'rock' (+2.00); mood 'angry' is not 'intense' (+0.00); energy 0.88 vs target 0.90 (+0.98)",
+            "adjustment": ""
+          },
+          {
+            "rank": 3,
+            "id": 5,
+            "title": "Gym Hero",
+            "artist": "Max Pulse",
+            "genre": "pop",
+            "mood": "intense",
+            "energy": 0.93,
+            "score": 1.97,
+            "explanation": "genre 'pop' is not 'rock' (+0.00); mood matches 'intense' (+1.00); energy 0.93 vs target 0.90 (+0.97)",
+            "adjustment": ""
+          },
+          {
+            "rank": 4,
+            "id": 15,
+            "title": "Pulse Reactor",
+            "artist": "Kilowatt Kid",
+            "genre": "edm",
+            "mood": "euphoric",
+            "energy": 0.95,
+            "score": 0.95,
+            "explanation": "genre 'edm' is not 'rock' (+0.00); mood 'euphoric' is not 'intense' (+0.00); energy 0.95 vs target 0.90 (+0.95)",
+            "adjustment": ""
+          },
+          {
+            "rank": 5,
+            "id": 13,
+            "title": "Iron Lung Parade",
+            "artist": "Grave Engine",
+            "genre": "metal",
+            "mood": "angry",
+            "energy": 0.97,
+            "score": 0.93,
+            "explanation": "genre 'metal' is not 'rock' (+0.00); mood 'angry' is not 'intense' (+0.00); energy 0.97 vs target 0.90 (+0.93)",
+            "adjustment": ""
+          }
+        ],
+        "baseline_evaluation": {
+          "verdict": "good",
+          "metrics": {
+            "n": 5,
+            "genre_matches": 2,
+            "achievable_genre_matches": 2,
+            "mood_matches": 2,
+            "achievable_mood_matches": 2,
+            "mean_energy_distance": 0.036,
+            "max_energy_distance": 0.07,
+            "energy_violations": 0,
+            "off_target": 0,
+            "unique_artists": 5,
+            "max_artist_repeat": 1,
+            "unique_genres": 4,
+            "duplicate_songs": 0
+          },
+          "issues": [
+            {
+              "code": "LIMITED_GENRE_COVERAGE",
+              "severity": "info",
+              "message": "The catalog has only 2 'rock' song(s); 3 slot(s) had to be filled from other genres."
+            }
+          ],
+          "error": null
+        },
+        "final_evaluation": {
+          "verdict": "good",
+          "metrics": {
+            "n": 5,
+            "genre_matches": 2,
+            "achievable_genre_matches": 2,
+            "mood_matches": 2,
+            "achievable_mood_matches": 2,
+            "mean_energy_distance": 0.036,
+            "max_energy_distance": 0.07,
+            "energy_violations": 0,
+            "off_target": 0,
+            "unique_artists": 5,
+            "max_artist_repeat": 1,
+            "unique_genres": 4,
+            "duplicate_songs": 0
+          },
+          "issues": [
+            {
+              "code": "LIMITED_GENRE_COVERAGE",
+              "severity": "info",
+              "message": "The catalog has only 2 'rock' song(s); 3 slot(s) had to be filled from other genres."
+            }
+          ],
+          "error": null
+        }
+      }
+    },
+    {
+      "profile": "Contradictory (Ambient + Angry + 0.95)",
+      "input": {
+        "genre": "ambient",
+        "mood": "angry",
+        "target_energy": 0.95
+      },
+      "outcome": "revision accepted",
+      "revision_activated": true,
+      "revision_accepted": true,
+      "final_config": "rebalanced weights",
+      "baseline_titles": [
+        "Spacewalk Thoughts",
+        "Iron Lung Parade",
+        "Basement Riot",
+        "Pulse Reactor",
+        "Gym Hero"
+      ],
+      "final_titles": [
+        "Iron Lung Parade",
+        "Basement Riot",
+        "Pulse Reactor",
+        "Gym Hero",
+        "Storm Runner"
+      ],
+      "baseline_verdict": "acceptable",
+      "final_verdict": "good",
+      "comparison": {
+        "genre_matches": {
+          "baseline": 1,
+          "final": 0,
+          "change": "worse"
+        },
+        "mood_matches": {
+          "baseline": 2,
+          "final": 2,
+          "change": "same"
+        },
+        "mean_energy_distance": {
+          "baseline": 0.156,
+          "final": 0.03,
+          "change": "better"
+        },
+        "energy_violations": {
+          "baseline": 1,
+          "final": 0,
+          "change": "better"
+        },
+        "off_target": {
+          "baseline": 0,
+          "final": 0,
+          "change": "same"
+        },
+        "unique_artists": {
+          "baseline": 5,
+          "final": 5,
+          "change": "same"
+        },
+        "unique_genres": {
+          "baseline": 5,
+          "final": 4,
+          "change": "worse"
+        },
+        "warnings": {
+          "baseline": 1,
+          "final": 0,
+          "change": "better"
+        }
+      },
+      "baseline_issues": [
+        "'Spacewalk Thoughts' has energy 0.28, 0.67 from the target 0.95."
+      ],
+      "final_issues": [],
+      "limitations": [
+        "No song in the catalog is both 'ambient' and 'angry'. 'ambient' songs here are: chill.",
+        "Every 'ambient' song is far from energy 0.95 (closest gap 0.67; available: 0.28).",
+        "The catalog has only 1 'ambient' song(s); 4 slot(s) had to be filled from other genres."
+      ],
+      "attempts": [
+        {
+          "strategy": "rebalance_weights",
+          "targeted_issues": [
+            "ENERGY_MISMATCH"
+          ],
+          "titles": [
+            "Iron Lung Parade",
+            "Basement Riot",
+            "Pulse Reactor",
+            "Gym Hero",
+            "Storm Runner"
+          ],
+          "accepted": true,
+          "reasons": [
+            "Q1 passed: warnings 1 -> 0",
+            "trade-off: genre_matches 1 -> 0 (within the allowed loss of 1)"
+          ]
+        }
+      ],
+      "audit": [
+        "validated input: fields=['genre', 'mood', 'target_energy'], k=5, catalog=20 songs",
+        "baseline (default weights): verdict=acceptable, warnings=['ENERGY_MISMATCH']",
+        "attempt 1: rebalance_weights targeting ['ENERGY_MISMATCH'] -> ACCEPTED (Q1 passed: warnings 1 -> 0; trade-off: genre_matches 1 -> 0 (within the allowed loss of 1))",
+        "final (rebalanced weights): verdict=good, outcome=revision accepted"
+      ],
+      "detail": {
+        "baseline": [
+          {
+            "rank": 1,
+            "id": 6,
+            "title": "Spacewalk Thoughts",
+            "artist": "Orbit Bloom",
+            "genre": "ambient",
+            "mood": "chill",
+            "energy": 0.28,
+            "score": 2.33,
+            "explanation": "genre matches 'ambient' (+2.00); mood 'chill' is not 'angry' (+0.00); energy 0.28 vs target 0.95 (+0.33)",
+            "adjustment": ""
+          },
+          {
+            "rank": 2,
+            "id": 13,
+            "title": "Iron Lung Parade",
+            "artist": "Grave Engine",
+            "genre": "metal",
+            "mood": "angry",
+            "energy": 0.97,
+            "score": 1.98,
+            "explanation": "genre 'metal' is not 'ambient' (+0.00); mood matches 'angry' (+1.00); energy 0.97 vs target 0.95 (+0.98)",
+            "adjustment": ""
+          },
+          {
+            "rank": 3,
+            "id": 20,
+            "title": "Basement Riot",
+            "artist": "Cutthroat Choir",
+            "genre": "rock",
+            "mood": "angry",
+            "energy": 0.88,
+            "score": 1.93,
+            "explanation": "genre 'rock' is not 'ambient' (+0.00); mood matches 'angry' (+1.00); energy 0.88 vs target 0.95 (+0.93)",
+            "adjustment": ""
+          },
+          {
+            "rank": 4,
+            "id": 15,
+            "title": "Pulse Reactor",
+            "artist": "Kilowatt Kid",
+            "genre": "edm",
+            "mood": "euphoric",
+            "energy": 0.95,
+            "score": 1.0,
+            "explanation": "genre 'edm' is not 'ambient' (+0.00); mood 'euphoric' is not 'angry' (+0.00); energy 0.95 vs target 0.95 (+1.00)",
+            "adjustment": ""
+          },
+          {
+            "rank": 5,
+            "id": 5,
+            "title": "Gym Hero",
+            "artist": "Max Pulse",
+            "genre": "pop",
+            "mood": "intense",
+            "energy": 0.93,
+            "score": 0.98,
+            "explanation": "genre 'pop' is not 'ambient' (+0.00); mood 'intense' is not 'angry' (+0.00); energy 0.93 vs target 0.95 (+0.98)",
+            "adjustment": ""
+          }
+        ],
+        "final": [
+          {
+            "rank": 1,
+            "id": 13,
+            "title": "Iron Lung Parade",
+            "artist": "Grave Engine",
+            "genre": "metal",
+            "mood": "angry",
+            "energy": 0.97,
+            "score": 3.46,
+            "explanation": "genre 'metal' is not 'ambient' (+0.00); mood matches 'angry' (+1.50); energy 0.97 vs target 0.95 (+1.96)",
+            "adjustment": ""
+          },
+          {
+            "rank": 2,
+            "id": 20,
+            "title": "Basement Riot",
+            "artist": "Cutthroat Choir",
+            "genre": "rock",
+            "mood": "angry",
+            "energy": 0.88,
+            "score": 3.36,
+            "explanation": "genre 'rock' is not 'ambient' (+0.00); mood matches 'angry' (+1.50); energy 0.88 vs target 0.95 (+1.86)",
+            "adjustment": ""
+          },
+          {
+            "rank": 3,
+            "id": 15,
+            "title": "Pulse Reactor",
+            "artist": "Kilowatt Kid",
+            "genre": "edm",
+            "mood": "euphoric",
+            "energy": 0.95,
+            "score": 2.0,
+            "explanation": "genre 'edm' is not 'ambient' (+0.00); mood 'euphoric' is not 'angry' (+0.00); energy 0.95 vs target 0.95 (+2.00)",
+            "adjustment": ""
+          },
+          {
+            "rank": 4,
+            "id": 5,
+            "title": "Gym Hero",
+            "artist": "Max Pulse",
+            "genre": "pop",
+            "mood": "intense",
+            "energy": 0.93,
+            "score": 1.96,
+            "explanation": "genre 'pop' is not 'ambient' (+0.00); mood 'intense' is not 'angry' (+0.00); energy 0.93 vs target 0.95 (+1.96)",
+            "adjustment": ""
+          },
+          {
+            "rank": 5,
+            "id": 3,
+            "title": "Storm Runner",
+            "artist": "Voltline",
+            "genre": "rock",
+            "mood": "intense",
+            "energy": 0.91,
+            "score": 1.92,
+            "explanation": "genre 'rock' is not 'ambient' (+0.00); mood 'intense' is not 'angry' (+0.00); energy 0.91 vs target 0.95 (+1.92)",
+            "adjustment": ""
+          }
+        ],
+        "baseline_evaluation": {
+          "verdict": "acceptable",
+          "metrics": {
+            "n": 5,
+            "genre_matches": 1,
+            "achievable_genre_matches": 1,
+            "mood_matches": 2,
+            "achievable_mood_matches": 2,
+            "mean_energy_distance": 0.156,
+            "max_energy_distance": 0.67,
+            "energy_violations": 1,
+            "off_target": 0,
+            "unique_artists": 5,
+            "max_artist_repeat": 1,
+            "unique_genres": 5,
+            "duplicate_songs": 0
+          },
+          "issues": [
+            {
+              "code": "ENERGY_MISMATCH",
+              "severity": "warning",
+              "message": "'Spacewalk Thoughts' has energy 0.28, 0.67 from the target 0.95."
+            },
+            {
+              "code": "LIMITED_GENRE_COVERAGE",
+              "severity": "info",
+              "message": "The catalog has only 1 'ambient' song(s); 4 slot(s) had to be filled from other genres."
+            },
+            {
+              "code": "UNSATISFIABLE_COMBINATION",
+              "severity": "info",
+              "message": "No song in the catalog is both 'ambient' and 'angry'."
+            }
+          ],
+          "error": null
+        },
+        "final_evaluation": {
+          "verdict": "good",
+          "metrics": {
+            "n": 5,
+            "genre_matches": 0,
+            "achievable_genre_matches": 1,
+            "mood_matches": 2,
+            "achievable_mood_matches": 2,
+            "mean_energy_distance": 0.03,
+            "max_energy_distance": 0.07,
+            "energy_violations": 0,
+            "off_target": 0,
+            "unique_artists": 5,
+            "max_artist_repeat": 1,
+            "unique_genres": 4,
+            "duplicate_songs": 0
+          },
+          "issues": [
+            {
+              "code": "LIMITED_GENRE_COVERAGE",
+              "severity": "info",
+              "message": "The catalog has only 1 'ambient' song(s); 4 slot(s) had to be filled from other genres."
+            },
+            {
+              "code": "UNSATISFIABLE_COMBINATION",
+              "severity": "info",
+              "message": "No song in the catalog is both 'ambient' and 'angry'."
+            }
+          ],
+          "error": null
+        }
+      }
+    },
+    {
+      "profile": "Limited Coverage (Classical)",
+      "input": {
+        "genre": "classical",
+        "mood": "sad",
+        "target_energy": 0.2,
+        "likes_acoustic": true
+      },
+      "outcome": "revision rejected; baseline kept",
+      "revision_activated": true,
+      "revision_accepted": false,
+      "final_config": "default weights",
+      "baseline_titles": [
+        "Rain on Glasshouse",
+        "Neon Heartbreak",
+        "Spacewalk Thoughts",
+        "Paper Boat Ballad",
+        "Library Rain"
+      ],
+      "final_titles": [
+        "Rain on Glasshouse",
+        "Neon Heartbreak",
+        "Spacewalk Thoughts",
+        "Paper Boat Ballad",
+        "Library Rain"
+      ],
+      "baseline_verdict": "acceptable",
+      "final_verdict": "acceptable",
+      "comparison": {
+        "genre_matches": {
+          "baseline": 1,
+          "final": 1,
+          "change": "same"
+        },
+        "mood_matches": {
+          "baseline": 2,
+          "final": 2,
+          "change": "same"
+        },
+        "mean_energy_distance": {
+          "baseline": 0.158,
+          "final": 0.158,
+          "change": "same"
+        },
+        "energy_violations": {
+          "baseline": 1,
+          "final": 1,
+          "change": "same"
+        },
+        "off_target": {
+          "baseline": 0,
+          "final": 0,
+          "change": "same"
+        },
+        "unique_artists": {
+          "baseline": 5,
+          "final": 5,
+          "change": "same"
+        },
+        "unique_genres": {
+          "baseline": 5,
+          "final": 5,
+          "change": "same"
+        },
+        "warnings": {
+          "baseline": 1,
+          "final": 1,
+          "change": "same"
+        }
+      },
+      "baseline_issues": [
+        "'Neon Heartbreak' has energy 0.64, 0.44 from the target 0.20."
+      ],
+      "final_issues": [
+        "'Neon Heartbreak' has energy 0.64, 0.44 from the target 0.20."
+      ],
+      "limitations": [
+        "The catalog has only 1 'classical' song(s); 4 slot(s) had to be filled from other genres."
+      ],
+      "attempts": [
+        {
+          "strategy": "rebalance_weights",
+          "targeted_issues": [
+            "ENERGY_MISMATCH"
+          ],
+          "titles": [
+            "Rain on Glasshouse",
+            "Neon Heartbreak",
+            "Spacewalk Thoughts",
+            "Paper Boat Ballad",
+            "Library Rain"
+          ],
+          "accepted": false,
+          "reasons": [
+            "Q1 failed: warnings did not decrease (1 -> 1)"
+          ]
+        }
+      ],
+      "audit": [
+        "validated input: fields=['genre', 'likes_acoustic', 'mood', 'target_energy'], k=5, catalog=20 songs",
+        "baseline (default weights): verdict=acceptable, warnings=['ENERGY_MISMATCH']",
+        "attempt 1: rebalance_weights targeting ['ENERGY_MISMATCH'] -> REJECTED (Q1 failed: warnings did not decrease (1 -> 1))",
+        "final (default weights): verdict=acceptable, outcome=revision rejected; baseline kept"
+      ],
+      "detail": {
+        "baseline": [
+          {
+            "rank": 1,
+            "id": 16,
+            "title": "Rain on Glasshouse",
+            "artist": "Elena Voss",
+            "genre": "classical",
+            "mood": "sad",
+            "energy": 0.18,
+            "score": 4.465,
+            "explanation": "genre matches 'classical' (+2.00); mood matches 'sad' (+1.00); energy 0.18 vs target 0.20 (+0.98); acoustic fit 0.97 (+0.48)",
+            "adjustment": ""
+          },
+          {
+            "rank": 2,
+            "id": 19,
+            "title": "Neon Heartbreak",
+            "artist": "Glass Arcade",
+            "genre": "pop",
+            "mood": "sad",
+            "energy": 0.64,
+            "score": 1.685,
+            "explanation": "genre 'pop' is not 'classical' (+0.00); mood matches 'sad' (+1.00); energy 0.64 vs target 0.20 (+0.56); acoustic fit 0.25 (+0.12)",
+            "adjustment": ""
+          },
+          {
+            "rank": 3,
+            "id": 6,
+            "title": "Spacewalk Thoughts",
+            "artist": "Orbit Bloom",
+            "genre": "ambient",
+            "mood": "chill",
+            "energy": 0.28,
+            "score": 1.38,
+            "explanation": "genre 'ambient' is not 'classical' (+0.00); mood 'chill' is not 'sad' (+0.00); energy 0.28 vs target 0.20 (+0.92); acoustic fit 0.92 (+0.46)",
+            "adjustment": ""
+          },
+          {
+            "rank": 4,
+            "id": 18,
+            "title": "Paper Boat Ballad",
+            "artist": "Wren & Willow",
+            "genre": "folk",
+            "mood": "melancholy",
+            "energy": 0.3,
+            "score": 1.35,
+            "explanation": "genre 'folk' is not 'classical' (+0.00); mood 'melancholy' is not 'sad' (+0.00); energy 0.30 vs target 0.20 (+0.90); acoustic fit 0.90 (+0.45)",
+            "adjustment": ""
+          },
+          {
+            "rank": 5,
+            "id": 4,
+            "title": "Library Rain",
+            "artist": "Paper Lanterns",
+            "genre": "lofi",
+            "mood": "chill",
+            "energy": 0.35,
+            "score": 1.28,
+            "explanation": "genre 'lofi' is not 'classical' (+0.00); mood 'chill' is not 'sad' (+0.00); energy 0.35 vs target 0.20 (+0.85); acoustic fit 0.86 (+0.43)",
+            "adjustment": ""
+          }
+        ],
+        "final": [
+          {
+            "rank": 1,
+            "id": 16,
+            "title": "Rain on Glasshouse",
+            "artist": "Elena Voss",
+            "genre": "classical",
+            "mood": "sad",
+            "energy": 0.18,
+            "score": 4.465,
+            "explanation": "genre matches 'classical' (+2.00); mood matches 'sad' (+1.00); energy 0.18 vs target 0.20 (+0.98); acoustic fit 0.97 (+0.48)",
+            "adjustment": ""
+          },
+          {
+            "rank": 2,
+            "id": 19,
+            "title": "Neon Heartbreak",
+            "artist": "Glass Arcade",
+            "genre": "pop",
+            "mood": "sad",
+            "energy": 0.64,
+            "score": 1.685,
+            "explanation": "genre 'pop' is not 'classical' (+0.00); mood matches 'sad' (+1.00); energy 0.64 vs target 0.20 (+0.56); acoustic fit 0.25 (+0.12)",
+            "adjustment": ""
+          },
+          {
+            "rank": 3,
+            "id": 6,
+            "title": "Spacewalk Thoughts",
+            "artist": "Orbit Bloom",
+            "genre": "ambient",
+            "mood": "chill",
+            "energy": 0.28,
+            "score": 1.38,
+            "explanation": "genre 'ambient' is not 'classical' (+0.00); mood 'chill' is not 'sad' (+0.00); energy 0.28 vs target 0.20 (+0.92); acoustic fit 0.92 (+0.46)",
+            "adjustment": ""
+          },
+          {
+            "rank": 4,
+            "id": 18,
+            "title": "Paper Boat Ballad",
+            "artist": "Wren & Willow",
+            "genre": "folk",
+            "mood": "melancholy",
+            "energy": 0.3,
+            "score": 1.35,
+            "explanation": "genre 'folk' is not 'classical' (+0.00); mood 'melancholy' is not 'sad' (+0.00); energy 0.30 vs target 0.20 (+0.90); acoustic fit 0.90 (+0.45)",
+            "adjustment": ""
+          },
+          {
+            "rank": 5,
+            "id": 4,
+            "title": "Library Rain",
+            "artist": "Paper Lanterns",
+            "genre": "lofi",
+            "mood": "chill",
+            "energy": 0.35,
+            "score": 1.28,
+            "explanation": "genre 'lofi' is not 'classical' (+0.00); mood 'chill' is not 'sad' (+0.00); energy 0.35 vs target 0.20 (+0.85); acoustic fit 0.86 (+0.43)",
+            "adjustment": ""
+          }
+        ],
+        "baseline_evaluation": {
+          "verdict": "acceptable",
+          "metrics": {
+            "n": 5,
+            "genre_matches": 1,
+            "achievable_genre_matches": 1,
+            "mood_matches": 2,
+            "achievable_mood_matches": 2,
+            "mean_energy_distance": 0.158,
+            "max_energy_distance": 0.44,
+            "energy_violations": 1,
+            "off_target": 0,
+            "unique_artists": 5,
+            "max_artist_repeat": 1,
+            "unique_genres": 5,
+            "duplicate_songs": 0
+          },
+          "issues": [
+            {
+              "code": "ENERGY_MISMATCH",
+              "severity": "warning",
+              "message": "'Neon Heartbreak' has energy 0.64, 0.44 from the target 0.20."
+            },
+            {
+              "code": "LIMITED_GENRE_COVERAGE",
+              "severity": "info",
+              "message": "The catalog has only 1 'classical' song(s); 4 slot(s) had to be filled from other genres."
+            }
+          ],
+          "error": null
+        },
+        "final_evaluation": {
+          "verdict": "acceptable",
+          "metrics": {
+            "n": 5,
+            "genre_matches": 1,
+            "achievable_genre_matches": 1,
+            "mood_matches": 2,
+            "achievable_mood_matches": 2,
+            "mean_energy_distance": 0.158,
+            "max_energy_distance": 0.44,
+            "energy_violations": 1,
+            "off_target": 0,
+            "unique_artists": 5,
+            "max_artist_repeat": 1,
+            "unique_genres": 5,
+            "duplicate_songs": 0
+          },
+          "issues": [
+            {
+              "code": "ENERGY_MISMATCH",
+              "severity": "warning",
+              "message": "'Neon Heartbreak' has energy 0.64, 0.44 from the target 0.20."
+            },
+            {
+              "code": "LIMITED_GENRE_COVERAGE",
+              "severity": "info",
+              "message": "The catalog has only 1 'classical' song(s); 4 slot(s) had to be filled from other genres."
+            }
+          ],
+          "error": null
+        }
+      }
+    }
+  ]
+}
