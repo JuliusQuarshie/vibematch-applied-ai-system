@@ -13,3 +13,22 @@ venv/
 
 # Pytest cache
 .pytest_cache/
+.venv*/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+*~
+tmp/
+
+# Secrets
+.env
+.env.*
+*.pem
+*.key
+secrets.*

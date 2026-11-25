@@ -76,10 +76,12 @@ class Recommender:
         return f"Score {score:.2f}: " + "; ".join(reasons)
 
 
-def load_songs(csv_path: str) -> List[Dict]:
+def load_songs(csv_path: str, skipped: Optional[List[Tuple[int, str]]] = None) -> List[Dict]:
     """
     Loads songs from a CSV file into dicts with numeric fields converted.
     Rows with missing or invalid values are skipped with a warning on stderr.
+    If a `skipped` list is passed, (line_number, reason) is appended for each skipped row
+    so callers (see src/guardrails.py) can report data-quality problems.
     Raises FileNotFoundError if the file does not exist.
     Required by src/main.py
     """
@@ -100,6 +102,8 @@ def load_songs(csv_path: str) -> List[Dict]:
                     raise ValueError("title, genre and mood are required")
             except (KeyError, ValueError) as err:
                 print(f"Warning: skipping line {line_no} in {csv_path}: {err}", file=sys.stderr)
+                if skipped is not None:
+                    skipped.append((line_no, str(err)))
                 continue
             song["genre"] = song["genre"].lower()
             song["mood"] = song["mood"].lower()
