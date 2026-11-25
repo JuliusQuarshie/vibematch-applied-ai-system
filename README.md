@@ -95,8 +95,8 @@ logging, the CSV loader's guardrails, the evaluation script, automated tests and
 
 ## Setup
 
-Requires Python 3.9+ (developed and tested on Python 3.11.2). The system itself uses only the
-standard library; `pytest` is the only dependency.
+Tested on Python 3.11. The system itself uses only the standard library; `pytest` is the only
+dependency.
 
 ```bash
 git clone https://github.com/JuliusQuarshie/vibematch-applied-ai-system.git
@@ -473,8 +473,12 @@ for diversity or energy agreement. The rejected revisions were as informative as
 one: with a 20-song catalog the limiting factor is usually the data, and a "self-correcting"
 system needs explicit rules for when not to change anything.
 
-> **[TO COMPLETE BEFORE SUBMISSION]** Add two or three sentences in your own words about what
-> you personally learned. See the questions in `model_card.md`, section 13.
+For me, the biggest lesson was that getting a system to produce an output is different from
+making sure that output is useful and reliable. The contradictory profile showed this well: 2.0
+fixed the energy mismatch but lost the requested genre, which made me realize that reliability
+can't always be reduced to a single score, and that the rules used to judge quality are design
+decisions too. Working with Claude Code also showed me that AI can speed up implementation, but
+it still needs clear requirements, constraints, and verification.
 
 ## Documentation
 

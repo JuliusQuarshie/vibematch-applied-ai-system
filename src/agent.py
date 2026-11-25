@@ -34,7 +34,7 @@ avoid hearing the same artist twice, but not two.
 """
 
 from dataclasses import asdict, dataclass, field
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional, Tuple
 
 from src.evaluator import EvaluationReport, safe_evaluate
 from src.guardrails import CatalogError, ValidationError, validate_catalog, validate_k, validate_preferences
@@ -197,7 +197,7 @@ def plan_next(report: EvaluationReport, tried: List[str]) -> Optional[str]:
 
 # --- Acceptance policy ------------------------------------------------------
 
-def decide(candidate: EvaluationReport, current: EvaluationReport, baseline: EvaluationReport) -> (bool, List[str]):
+def decide(candidate: EvaluationReport, current: EvaluationReport, baseline: EvaluationReport) -> Tuple[bool, List[str]]:
     """Applies the documented acceptance policy. Returns (accepted, reasons)."""
     c, cur, base = candidate.metrics, current.metrics, baseline.metrics
     failures, passes = [], []
