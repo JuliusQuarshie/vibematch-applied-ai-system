@@ -1,0 +1,46 @@
+flowchart TD
+    %% VibeMatch 2.0 architecture: data flow and the bounded evaluate-and-revise loop
+
+    user([User preferences<br/>genre, mood, energy, acoustic, k]) --> cli[CLI<br/>src/main.py]
+    csv[(data/songs.csv)] --> loader[CSV loader + catalog guardrails<br/>src/guardrails.py: load_catalog]
+    loader -->|missing / malformed / empty| catErr[/Catalog error message, exit 1/]
+    loader -->|clean, de-duplicated songs| validate
+    cli --> validate{Input validation<br/>src/guardrails.py}
+    validate -->|invalid| inputErr[/Actionable error messages, exit 2/]
+    validate -->|valid prefs + feasibility warnings| engine[Weighted scoring engine<br/>src/recommender.py<br/>VibeMatch 1.0 baseline]
+
+    engine --> evalBase[Reliability evaluator<br/>src/evaluator.py<br/>independent metrics, no weighted score]
+
+    subgraph revision [Bounded revision workflow - src/agent.py, max 3 attempts]
+        plan{Warning-level issues<br/>with an untried strategy?}
+        revise[Apply strategy<br/>rebalance_weights or diversity_rerank]
+        reeval[Re-evaluate candidate<br/>src/evaluator.py]
+        decide{Acceptance policy<br/>H1-H3 hard constraints<br/>Q1-Q3 quality criteria}
+        keep[Keep candidate as current list]
+        reject[Reject candidate, keep current list]
+        plan -->|yes| revise --> reeval --> decide
+        decide -->|accept| keep
+        decide -->|reject| reject
+        keep --> plan
+        reject --> plan
+    end
+
+    evalBase --> plan
+    plan -->|no, or limit reached| output
+
+    output[/Final output<br/>ranked songs + explanations, quality metrics,<br/>catalog limitations, audit trail/]
+
+    logs[(Structured logs<br/>src/logging_config.py)]
+    validate -.-> logs
+    loader -.-> logs
+    decide -.-> logs
+    evalBase -.-> logs
+
+    tests[[Automated tests<br/>pytest: tests/]] -.->|verify| validate
+    tests -.->|verify| engine
+    tests -.->|verify| evalBase
+    tests -.->|verify| decide
+    evalscript[[Evaluation script<br/>src/evaluate.py<br/>1.0 vs 2.0 on 5 profiles]] -.-> report[(evaluation/results.json<br/>evaluation/summary.md)]
+    report --> human[Human review<br/>of outputs, metrics and audit trail]
+    output --> human
+    human -.->|adjusts policy, weights, data| engine

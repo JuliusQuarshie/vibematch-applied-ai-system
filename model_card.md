@@ -1,160 +1,246 @@
-# 🎧 Model Card: Music Recommender Simulation
+# Model Card: VibeMatch 2.0
 
-## 1. Model Name
+## 1. System name
 
-**VibeMatch 1.0**
+**VibeMatch 2.0**: an explainable, self-checking music recommender. It extends **VibeMatch 1.0**,
+my CodePath AI110 Module 3 Music Recommender Simulation
+(https://github.com/JuliusQuarshie/ai110-module3show-musicrecommendersimulation-starter).
 
----
+Repository: https://github.com/JuliusQuarshie/vibematch-applied-ai-system
 
-## 2. Intended Use
+## 2. Intended and non-intended uses
 
-VibeMatch is a simple music recommendation system that suggests five songs based on a user's preferences. It considers their favorite genre, preferred mood, target energy level, and whether they enjoy acoustic music.
+**Intended uses**
 
-The goal is to demonstrate how recommendation systems can use song features and user preferences to rank music. Each recommendation includes a score and an explanation of how that score was calculated.
+- A portfolio and teaching project showing how to wrap a simple recommender in input validation,
+  independent quality checks, bounded self-correction and transparent reporting.
+- Exploring how scoring weights, catalog coverage and acceptance rules affect recommendations.
 
-This project is meant for learning and experimentation, not for use as a real streaming service. The catalog is small, the songs are fictional, and the system doesn't learn from users' actual listening habits.
+**Not intended for**
 
----
+- Real music recommendation for real listeners. The catalog has 20 fictional songs and there is
+  no listening data.
+- Any claim about what people will enjoy. The system has never been tested with users.
+- Decisions with consequences for people, such as playlist placement, royalties or artist
+  promotion.
+- Inferring anything about a person from their music taste.
 
-## 3. How the Model Works
+## 3. Original project and new capabilities
 
-VibeMatch uses a weighted scoring system. Instead of randomly recommending songs, it compares each song's features with the user's preferences.
+**VibeMatch 1.0** scored each song (+2.0 genre match, +1.0 mood match, up to +1.0 energy closeness,
+up to +0.5 acoustic fit), returned the top five with per-point explanations, and included a
+weight-shift experiment and 20 tests.
 
-Each song can earn:
+**VibeMatch 2.0** keeps that scorer unchanged as the baseline and adds:
 
-- **2 points** if its genre matches the user's favorite genre.
-- **1 point** if its mood matches the user's preferred mood.
-- **Up to 1 point** based on how close its energy level is to the user's target.
-- **Up to 0.5 points** for acoustic similarity, if the user provides that preference.
+- **Guardrails** (`src/guardrails.py`): validation of preferences, `k` and the CSV catalog, with
+  actionable error messages, duplicate removal, and warnings for preferences the catalog cannot
+  satisfy together.
+- **Independent evaluator** (`src/evaluator.py`): quality metrics computed from song attributes,
+  never from the weighted score.
+- **Bounded revision workflow** (`src/agent.py`): up to three evaluate → revise → re-evaluate →
+  accept/reject cycles with an explicit acceptance policy.
+- **Structured logging, an integrated CLI, and a reproducible 1.0-vs-2.0 evaluation script.**
 
-After calculating the scores, the program sorts the songs from highest to lowest and returns the top five recommendations. Songs with identical scores are sorted alphabetically by title.
+## 4. Dataset and limitations
 
-I built the scoring logic in Python with help from Claude Code and made sure each recommendation includes reasons explaining the points awarded. The weights can also be adjusted to compare how different scoring rules affect the recommendations.
+`data/songs.csv` holds 20 fictional songs (10 from the starter, 10 added in Module 3) with genre,
+mood, energy, tempo, valence, danceability and acousticness.
 
----
-
-## 4. Data
-
-The dataset contains **20 fictional songs** stored in `data/songs.csv`. The starter repository originally had 10 songs, and another 10 were added to introduce more variety.
-
-The dataset includes:
-
-- **15 genres**, including pop, lofi, rock, hip hop, reggae, jazz, classical, metal, and others.
-- **13 moods**, including happy, chill, intense, relaxed, angry, nostalgic, and sad.
-- Numerical features such as energy, tempo, valence, danceability, and acousticness.
-
-The additional songs helped introduce different combinations of genres, moods, and energy levels.
-
-However, 20 songs are not enough to represent the variety of music people listen to. Some genres have only one song, and the dataset does not include real listening histories, user feedback, or songs from many musical traditions.
-
----
-
-## 5. Strengths
-
-One thing VibeMatch does well is recommending songs when the user's preferences are clear.
-
-For example, the Chill Lofi profile received three lofi songs at the top of its recommendations, with energy levels close to the requested value. The Intense Rock profile also received *Storm Runner*, a rock song with an intense mood and energy of 0.91, as its highest-ranked recommendation.
-
-The Chill Lofi and Intense Rock profiles had no songs in common in their top five, which shows that the algorithm can distinguish between very different preferences.
-
-Another strength is that users can see why songs were recommended. Instead of only displaying a ranked list, the system explains which features contributed to each score.
-
-The results are also consistent. Running the same profile with the same dataset and weights produces the same ranking.
-
----
-
-## 6. Limitations and Bias
-
-The biggest weakness I noticed was how much influence the genre weight had on the final rankings.
-
-Since a matching genre earns two points, a song can rank highly even when its mood and energy do not match what the user wants.
-
-This happened with the contradictory profile, which requested ambient music, an angry mood, and energy of 0.95. The system recommended *Spacewalk Thoughts* first, even though its energy was only 0.28. It ranked first mainly because its genre matched.
-
-I also noticed other limitations:
-
-- **Exact matching:** A song labeled `indie pop` does not receive genre points when the user selects `pop`, even though those genres are related.
-- **Uneven representation:** Pop and lofi have more songs than most other genres, giving those preferences more matching options.
-- **Limited variety:** The system can recommend several songs from the same genre or artist because it does not enforce diversity.
-- **Unused features:** Tempo, valence, and danceability are available in the dataset but are not used when calculating scores.
-- **Simple user profiles:** Each user can select only one favorite genre and mood, which does not reflect how varied people's music preferences can be.
-
-These limitations show how a recommendation system can produce mathematically correct rankings that do not necessarily reflect what someone would enjoy listening to.
-
----
-
-## 7. Evaluation
-
-I evaluated VibeMatch using four different user profiles:
-
-| Profile | Genre | Mood | Energy |
+| Genre | Songs | Genre | Songs |
 |---|---|---|---|
-| High-Energy Pop | Pop | Happy | 0.85 |
-| Chill Lofi | Lofi | Chill | 0.35 |
-| Intense Rock | Rock | Intense | 0.90 |
-| Contradictory | Ambient | Angry | 0.95 |
+| pop | 3 | lofi | 3 |
+| rock | 2 | every other genre (12 genres) | 1 each |
 
-The Chill Lofi profile also included a preference for acoustic music.
+- **Uneven representation.** Pop and lofi have three songs each; twelve of the fifteen genres have
+  only one. A pop or lofi fan can get three genre matches; a classical, jazz or ambient fan can get
+  at most one, so their lists are mostly filler from other genres. The evaluator reports this as
+  `LIMITED_GENRE_COVERAGE` instead of hiding it.
+- **Label gaps.** Some combinations don't exist (for example, no ambient song is angry and no
+  ambient song is high energy). The system says so rather than pretending a match exists.
+- **Fictional, culturally narrow data.** Genre and mood labels are single, hand-assigned words
+  from a mostly Western genre vocabulary.
+- **Unused features.** Tempo, valence and danceability are loaded and validated but not scored.
 
-### Results
+## 5. Algorithm and revision workflow
 
-The first three profiles produced recommendations that made sense based on their selected preferences.
+1. **Validate** catalog, `k` (1–10) and preferences. Invalid input returns readable errors.
+2. **Baseline**: the original `recommend_songs()` with default weights.
+3. **Evaluate** the baseline with the independent evaluator.
+4. **Plan**: choose the first untried strategy that targets a current warning:
+   - `rebalance_weights` (genre 1.0, mood 1.5, energy 2.0) for `ENERGY_MISMATCH`, `OFF_TARGET`,
+     `MOOD_MISSING`;
+   - `diversity_rerank` (−1.0 per earlier song by the same artist, −0.3 per earlier song of the
+     same non-requested genre) for `REPEATED_ARTIST`, `REPEATED_GENRE`, `DUPLICATE_SONG`.
+5. **Revise and re-evaluate.**
+6. **Decide** with the acceptance policy:
+   - H1–H3 (vs. baseline): no duplicates and same length; genre matches and mood matches may
+     each drop by at most one.
+   - Q1–Q3 (vs. current list): warnings strictly decrease; energy violations don't increase;
+     mean energy gap rises by no more than 0.05.
+7. **Stop** when no fixable warnings remain, no untried strategy applies, or three attempts have
+   run. Return final songs, explanations, metrics, limitations and an audit trail.
 
-Their top recommendations matched the requested genres, moods, and energy levels, with scores of 3.97, 4.43, and 3.99 respectively.
+Both strategies only re-rank songs that exist in the catalog. Neither creates or edits songs.
 
-High-Energy Pop and Intense Rock shared two songs in their top five: *Gym Hero* and *Basement Riot*. This was interesting because the profiles requested different genres, but both preferred high-energy music.
+## 6. Reliability evaluation methodology
 
-The contradictory profile revealed a problem. *Spacewalk Thoughts*, a low-energy ambient song, ranked above songs that better matched the requested angry mood and high energy.
+- **Independent metrics.** Genre and mood matches (each next to the achievable maximum for this
+  catalog), mean and max energy distance, energy violations (> 0.30 from target), off-target songs,
+  unique artists, max artist repeat, unique genres, duplicates. The evaluator never calls the
+  scorer (enforced by a test), so a revision can't pass just by raising its own score.
+- **Issue severity.** Warnings are fixable in principle; info issues are catalog limitations that
+  are only reported.
+- **Comparison.** `python -m src.evaluate` runs five profiles (High-Energy Pop, Chill Lofi,
+  Intense Rock, Contradictory, Limited Coverage/Classical) through 1.0 and 2.0 and records, per
+  metric, whether 2.0 is better, worse or the same. Output is deterministic and committed in
+  `evaluation/`.
+- **Automated tests.** 120 pytest tests (latest run: 120 passed), including tests that force
+  harmful revisions and check they are rejected.
 
-### Weight Experiment
+## 7. Measured results
 
-To understand this issue, I compared the original scoring weights with an alternative version.
+From `evaluation/summary.md` (k=5):
 
-I changed:
+| Profile | Revision | Decision | Warnings 1.0 → 2.0 | Notable metric changes |
+|---|---|---|---|---|
+| High-Energy Pop | not activated | n/a | 0 → 0 | none |
+| Chill Lofi | activated | rejected | 1 → 1 | none; LoRoom repeat remains |
+| Intense Rock | not activated | n/a | 0 → 0 | none |
+| Contradictory (Ambient + Angry + 0.95) | activated | accepted | 1 → 0 | mean energy gap 0.156 → 0.030, energy violations 1 → 0; genre matches 1 → 0, unique genres 5 → 4 |
+| Limited Coverage (Classical) | activated | rejected | 1 → 1 | none; *Neon Heartbreak* energy gap 0.44 remains |
 
-- Genre weight from **2.0 to 1.0**
-- Energy weight from **1.0 to 2.0**
+**Interpretation.** 2.0 changed one list out of five. That change is a trade-off: it fixed the
+energy mismatch 1.0 was known for, but removed the only song in the requested genre. Two attempts
+were rejected because they didn't remove the issue they targeted. In these cases the honest output
+is the original list plus a clear statement of what is wrong with it.
 
-I ran the experiment with Claude Code using:
+**What these numbers are not.** They measure agreement between a list and the stated preferences.
+They are not measurements of listener satisfaction, accuracy against real listening behaviour, or
+quality as judged by people. No user study was done.
 
-`python -m src.main --experiment`
+## 8. Potential biases and filter bubbles
 
-The changes affected the results:
+- **Genre dominance.** With default weights, a genre match alone (+2.0) is worth as much as a
+  perfect mood and energy match combined (+2.0). A genre-matching song with the wrong mood and a
+  poor energy fit can outrank a song that fits everything except the genre label, as the 1.0
+  contradictory profile showed. The revision workflow softens this only when the evaluator detects a
+  concrete problem.
+- **Filter bubble.** The system only recommends what matches stated preferences. It never
+  deliberately introduces new genres. Diversity re-ranking spreads artists and filler genres but
+  does not challenge the user's stated taste.
+- **Representation bias.** Users whose favourite genre has more catalog songs get measurably
+  "better" lists (3/3 genre matches for pop vs. 1/1 for classical with four filler songs). That
+  reflects the data, not the user.
+- **Evaluator bias.** The evaluator's idea of "good" (exact labels, a 0.30 energy tolerance,
+  artist variety) is a design choice. A listener who loves one artist might see repeated artists
+  as a feature.
 
-- **Contradictory profile:** *Spacewalk Thoughts* fell outside the top five, while *Iron Lung Parade* became the top recommendation.
-- **High-Energy Pop:** *Rooftop Lights* moved from fourth to third because its mood and energy were closer to the user's preferences.
-- **Chill Lofi:** *Spacewalk Thoughts* moved from fourth to third, ahead of *Focus Flow*.
-- **Intense Rock:** The ranking stayed the same, but *Gym Hero* came within 0.02 points of the second-ranked rock song.
+## 9. Limitations of deterministic scoring
 
-This experiment showed that changing the weights can improve recommendations for one type of user while making them less suitable for another.
+- Same input, same output: reproducible and testable, but it can't learn, personalise over time
+  or explore.
+- Exact string matching: no partial credit for related genres or moods ("indie pop" vs. "pop",
+  "melancholy" vs. "sad").
+- Thresholds (energy tolerance, penalties, one-slot loss rule) were set by reasoning, not fitted
+  to data, and a different choice changes outcomes. For example, a larger artist penalty would
+  remove the Chill Lofi repeat at the cost of a lofi song.
 
-### Automated Testing
+## 10. Guardrails and failure handling
 
-I used Claude Code to write and run a `pytest` suite that checks the system's behavior.
+- Invalid preferences (empty input, unknown genre/mood with suggestions, energy outside 0–1,
+  non-numeric/NaN/boolean energy, conflicting `energy` and `target_energy`, bad `likes_acoustic`)
+  produce all error messages at once and exit code 2.
+- Invalid `k` is rejected; `k` larger than the catalog is reduced with a note.
+- Missing, empty or malformed catalog files produce a clear error and exit code 1. Malformed rows
+  are skipped and reported. Duplicate songs are removed.
+- If the evaluator or a revision step raises an exception, it is logged with a traceback and the
+  user gets the baseline with a note, never a crash and never a silently unchecked "improved"
+  list.
+- Logging is structured (`event=... key=value`). At INFO level, only which preference fields were
+  supplied is logged, not their values.
 
-The test suite covered CSV loading, numerical conversions, scoring rules, recommendation explanations, ranking order, empty datasets, and tie-breaking.
+## 11. Ethical considerations
 
-**All 20 tests passed** during the final implementation run.
+- **Honesty about what the system is.** It is a rule-based scorer with a rule-based checker. It is
+  not a learned model and does not understand music or people. The README and this card say so.
+- **No overclaiming.** Results are framed as rule-based agreement metrics, and failures and
+  trade-offs are reported alongside successes.
+- **Transparency to the user.** Every list shows why each song was chosen, what was changed, what
+  could not be satisfied, and why a revision was kept or rejected.
+- **Privacy.** No accounts, no stored history. Logs avoid preference values except at DEBUG.
+- **Artist fairness (at scale).** In a real system, ranking rules like these decide which artists
+  get heard. Genre dominance and catalog coverage would systematically favour well-represented
+  genres.
+
+## 12. Future improvements
+
+- A larger, more diverse catalog, and partial credit for related genres and moods.
+- Use valence, tempo and danceability, and support multi-genre and multi-mood profiles.
+- Let users set how much diversity they want, instead of a fixed penalty.
+- Validate the evaluator's notion of "good" against real user feedback (skips, likes, ratings)
+  before claiming any satisfaction benefit.
+- More revision strategies (e.g., related-genre substitution) with the same accept/reject
+  discipline.
+
+## 13. Responsible AI reflection
+
+> **Julius: the items marked [TO COMPLETE] need your own answers before submission.** The facts
+> listed under them are drawn from the development record (`ai_interactions.md` and git history)
+> to help you answer. Please don't submit them unedited as your personal reflection.
+
+**1. How I collaborated with AI during development.**
+
+Facts from the record: for 2.0, I gave Claude Code (in VS Code) a detailed specification covering
+goals, the workflow steps, guardrails, test areas, evaluation profiles, documentation and commit
+milestones, plus rules (don't fabricate results, don't push without approval). Claude Code
+inspected the existing repo, implemented the modules and tests, ran them, generated the evaluation
+and drafted the docs. In Module 3, I asked Claude Code for a critical review before submission and
+directed the fixes.
+
+**[TO COMPLETE]** In your own words, how did you divide the work with the AI, and how did you check
+its output?
+
+**2. One AI suggestion that was accepted.**
+
+Candidate examples from this session, if you agree with them:
+(a) allowing a revision to lose at most one genre or mood match, which is what let the
+Contradictory revision through;
+(b) keeping the 1.0 output available via `--v1`/`--experiment` and making 2.0 the default CLI mode;
+(c) a test that re-runs the README examples so the documentation can't drift from the real output.
+
+**[TO COMPLETE]** Which suggestion did you accept, and why?
+
+**3. One AI suggestion that was rejected or revised.**
+
+Revisions that happened during development (see `ai_interactions.md`): the AI's first definition
+of an "off-target" song counted label mismatches even when no energy target was given, and it was
+narrowed to require an energy miss. Two of the AI's own new tests were wrong (one expected a
+diversity note on a list where the revision had been correctly rejected) and were corrected
+instead of changing the code to fit them. A commit message with a wrong test count was corrected
+before anything was pushed.
+
+**[TO COMPLETE]** Name a suggestion *you* rejected or changed (from this list or your own review),
+and why.
+
+**4. What the system does well and where it still struggles.**
+
+Does well: rejects bad input with specific, fixable messages; never crashes on the tested failure
+cases; explains every score; catches and reports energy mismatches, repeated artists and catalog
+gaps; refuses revisions that don't measurably help; produces identical results on every run.
+
+Struggles: it improved only one of five evaluation lists, and that improvement cost the requested
+genre. It can't fix problems caused by the tiny catalog (Classical, Chill Lofi). Its idea of
+"quality" is a set of hand-written rules that have never been checked against real listeners.
+
+**5. What I learned about building and evaluating a reliable applied AI system.**
+
+**[TO COMPLETE]** Your own takeaways.
 
 ---
 
-## 8. Future Work
+## Appendix: VibeMatch 1.0 reflection (Module 3, unchanged)
 
-If I continued developing VibeMatch, I would focus on making its recommendations more flexible and realistic.
-
-Some improvements I would consider are:
-
-- **Related genre matching:** Give partial points when genres are similar, such as pop and indie pop.
-- **More song features:** Include tempo, valence, and danceability in the scoring formula.
-- **Recommendation diversity:** Avoid recommending too many songs from the same artist or genre.
-- **More flexible profiles:** Allow users to select multiple favorite genres and moods.
-- **Larger dataset:** Add more songs from different genres, cultures, and musical styles.
-
-I would also like to explore how user feedback, such as likes and skips, could help the system improve its recommendations over time.
-
----
-
-## 9. Personal Reflection
 
 What stood out to me most during this project was how much the weights affected the recommendations. Before working through the scoring system, I understood that recommendations depended on user preferences, but I hadn't really considered how much difference assigning two points to genre instead of one could make.
 
